@@ -23,9 +23,10 @@ interface OrderFormProps {
   quantity?: number;
 }
 
-export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
+export default function OrderForm({ product, quantity: initialQuantity = 1 }: OrderFormProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [quantity, setQuantity] = useState(initialQuantity);
   const [communes, setCommunes] = useState<string[]>([]);
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [selectedWilaya, setSelectedWilaya] = useState<string>("");
@@ -169,6 +170,33 @@ export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+        {/* Quantity */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            الكمية
+          </label>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center text-xl font-bold text-gray-600 hover:border-gray-400 transition-colors"
+            >
+              −
+            </button>
+            <span className="w-10 text-center text-lg font-bold text-gray-800">
+              {quantity}
+            </span>
+            <button
+              type="button"
+              onClick={() => setQuantity((q) => Math.min(10, q + 1))}
+              className="w-10 h-10 rounded-xl border-2 border-gray-200 flex items-center justify-center text-xl font-bold text-gray-600 hover:border-gray-400 transition-colors"
+            >
+              +
+            </button>
+            <span className="text-xs text-gray-400">(الحد الأقصى 10)</span>
+          </div>
+        </div>
+
         {/* Name Row */}
         <div className="grid grid-cols-2 gap-3">
           <div>
