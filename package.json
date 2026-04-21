@@ -13,8 +13,6 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
-    "@libsql/client": "^0.14.0",
-    "@prisma/adapter-libsql": "^6.0.0",
     "@prisma/client": "^6.0.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
