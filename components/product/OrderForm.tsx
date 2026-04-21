@@ -370,7 +370,7 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
         {/* Address */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            العنوان التفصيلي <span className="text-red-500">*</span>
+            العنوان التفصيلي
           </label>
           <input
             {...register("address")}
@@ -473,7 +473,7 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
             <span className="font-bold text-gray-800">
               {deliveryFee > 0 ? formatPrice(deliveryFee) : "—"}
             </span>
-            <span className="text-gray-500">رسوم التوصيل:</span>
+            <span className="text-gray-500">سعر التوصيل:</span>
           </div>
 
           <div className="h-px bg-gray-200" />

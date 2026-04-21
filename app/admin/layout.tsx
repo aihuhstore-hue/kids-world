@@ -13,6 +13,7 @@ import {
   BookOpen,
   Settings,
   Ticket,
+  CheckCircle,
 } from "lucide-react";
 
 const navLinks = [
@@ -20,6 +21,7 @@ const navLinks = [
   { href: "/admin/products", label: "المنتجات", icon: Package },
   { href: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
   { href: "/admin/promo", label: "أكواد الخصم", icon: Ticket },
+  { href: "/admin/success-page", label: "صفحة الشكر", icon: CheckCircle },
   { href: "/admin/settings", label: "الإعدادات", icon: Settings },
 ];
 
