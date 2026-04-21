@@ -212,7 +212,12 @@ export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
             {...register("phone")}
             placeholder="0550000000"
             dir="ltr"
-            inputMode="tel"
+            inputMode="numeric"
+            maxLength={10}
+            onInput={(e) => {
+              const input = e.currentTarget;
+              input.value = input.value.replace(/\D/g, "").slice(0, 10);
+            }}
             className={`input-field text-left ${errors.phone ? "input-error" : ""}`}
           />
           {errors.phone && (
