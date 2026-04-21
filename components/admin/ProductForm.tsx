@@ -145,8 +145,8 @@ export default function ProductForm({
     const validFeatures = features.filter((f) => f.trim());
     const validImages = images.filter((i) => i.trim());
 
-    if (!form.name || !form.price || !form.hookTitle || !form.description) {
-      toast.error("يرجى ملء جميع الحقول المطلوبة");
+    if (!form.name) {
+      toast.error("يرجى إدخال اسم المنتج");
       return;
     }
     if (validImages.length === 0) {
@@ -276,7 +276,7 @@ export default function ProductForm({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                العنوان الجذاب (Hook) <span className="text-red-500">*</span>
+                العنوان الجذاب (Hook)
               </label>
               <div className="flex gap-2 items-center">
                 <input
@@ -284,7 +284,6 @@ export default function ProductForm({
                   onChange={(e) => update("hookTitle", e.target.value)}
                   className="input-field flex-1"
                   placeholder="هل تريد لعبة تنمي ذكاء طفلك وتبعده عن الشاشات؟ 🧠"
-                  required
                 />
                 <EmojiPicker
                   onSelect={(emoji) => update("hookTitle", form.hookTitle + emoji)}
@@ -297,7 +296,7 @@ export default function ProductForm({
 
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">
-                وصف مختصر <span className="text-red-500">*</span>
+                وصف مختصر
               </label>
               <textarea
                 rows={2}
@@ -305,7 +304,6 @@ export default function ProductForm({
                 onChange={(e) => update("description", e.target.value)}
                 className="input-field resize-none"
                 placeholder="وصف قصير وجذاب للمنتج..."
-                required
               />
             </div>
 
@@ -352,10 +350,9 @@ export default function ProductForm({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-medium text-gray-600 mb-1">
-                    السعر الحالي (دج) <span className="text-red-500">*</span>
+                    السعر الحالي (دج)
                   </label>
                   <input
-                    required
                     type="number"
                     value={form.price}
                     onChange={(e) => update("price", e.target.value)}
