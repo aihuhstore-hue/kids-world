@@ -157,7 +157,7 @@ export default function ProductForm({
       const payload = {
         ...form,
         slug: form.slug || generateSlug(form.name),
-        price: parseFloat(form.price),
+        price: parseFloat(form.price) || 0,
         oldPrice: form.oldPrice ? parseFloat(form.oldPrice) : null,
         stock: trackStock ? (parseInt(form.stock) || 0) : 0,
         showStock: form.showStock,
