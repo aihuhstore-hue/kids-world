@@ -663,7 +663,7 @@ export default function ProductForm({
                     </div>
                     {/* Preview */}
                     {img.trim() && (
-                      <div className="relative h-28 rounded-xl overflow-hidden bg-gray-100 mr-8">
+                      <div className={`relative rounded-xl overflow-hidden bg-gray-100 mr-8 ${i === 0 ? "h-52" : "h-24"}`}>
                         <Image
                           src={img}
                           alt={`صورة ${i + 1}`}
