@@ -5,13 +5,13 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient(): PrismaClient {
-  if (process.env.TURSO_AUTH_TOKEN) {
+  if (process.env.TURSO_AUTH_TOKEN && process.env.TURSO_DATABASE_URL) {
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { createClient } = require("@libsql/client");
+    const { createClient } = require("@libsql/client/http");
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { PrismaLibSQL } = require("@prisma/adapter-libsql");
     const libsql = createClient({
-      url: process.env.TURSO_DATABASE_URL!,
+      url: process.env.TURSO_DATABASE_URL,
       authToken: process.env.TURSO_AUTH_TOKEN,
     });
     const adapter = new PrismaLibSQL(libsql);
