@@ -149,10 +149,6 @@ export default function ProductForm({
       toast.error("يرجى إدخال اسم المنتج");
       return;
     }
-    if (validImages.length === 0) {
-      toast.error("يرجى إضافة صورة واحدة على الأقل");
-      return;
-    }
 
     setLoading(true);
     const password = sessionStorage.getItem("admin-password") ?? "";
