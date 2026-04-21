@@ -451,39 +451,33 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
         {/* Order Summary */}
         <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
           <div className="flex justify-between text-sm">
-            <span className="font-bold text-gray-800">
-              {formatPrice(subtotal)}
-            </span>
             <span className="text-gray-500">سعر المنتج × {quantity}:</span>
+            <span className="font-bold text-gray-800">{formatPrice(subtotal)}</span>
           </div>
 
           {discount > 0 && (
             <div className="flex justify-between text-sm">
-              <span className="font-bold text-green-600">
-                -{formatPrice(discount)}
-              </span>
               <span className="text-gray-500 flex items-center gap-1">
                 <Tag className="w-3 h-3" />
                 خصم كود {appliedPromo?.code}:
               </span>
+              <span className="font-bold text-green-600">-{formatPrice(discount)}</span>
             </div>
           )}
 
           <div className="flex justify-between text-sm">
+            <span className="text-gray-500">سعر التوصيل:</span>
             <span className="font-bold text-gray-800">
               {deliveryFee > 0 ? formatPrice(deliveryFee) : "—"}
             </span>
-            <span className="text-gray-500">سعر التوصيل:</span>
           </div>
 
           <div className="h-px bg-gray-200" />
           <div className="flex justify-between">
-            <span className="text-xl font-black text-gray-900">
-              {deliveryFee > 0
-                ? formatPrice(total)
-                : "يُحسب بعد اختيار الولاية"}
-            </span>
             <span className="font-bold text-gray-700">المجموع الكلي:</span>
+            <span className="text-xl font-black text-gray-900">
+              {deliveryFee > 0 ? formatPrice(total) : "يُحسب بعد اختيار الولاية"}
+            </span>
           </div>
           <p className="text-xs text-gray-400 text-center pt-1">
             💵 الدفع عند الاستلام فقط
