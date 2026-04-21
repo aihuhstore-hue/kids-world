@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import { join } from "path";
 import { isAdminAuthorized } from "@/lib/admin-auth";
 
 const ALLOWED_TYPES = ["image/jpeg", "image/jpg", "image/png", "image/webp", "image/gif"];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_SIZE = 5 * 1024 * 1024;
 
 export async function POST(req: NextRequest) {
   if (!(await isAdminAuthorized(req))) {
@@ -33,20 +31,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // اسم فريد للملف
-    const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
-    const fileName = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-
-    // مسار الحفظ
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(join(uploadDir, fileName), buffer);
+    const base64 = `data:${file.type};base64,${buffer.toString("base64")}`;
 
-    const url = `/uploads/${fileName}`;
-    return NextResponse.json({ url });
+    const formDataCloud = new FormData();
+    formDataCloud.append("file", base64);
+    formDataCloud.append("upload_preset", "unsigned_kids");
+    formDataCloud.append("folder", "kids-world");
+
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
+      { method: "POST", body: formDataCloud }
+    );
+
+    if (!res.ok) {
+      const err = await res.json();
+      console.error("Cloudinary error:", err);
+      return NextResponse.json({ error: "فشل رفع الصورة" }, { status: 500 });
+    }
+
+    const data = await res.json();
+    return NextResponse.json({ url: data.secure_url });
   } catch (err) {
     console.error("Upload error:", err);
     return NextResponse.json({ error: "حدث خطأ أثناء رفع الصورة" }, { status: 500 });
