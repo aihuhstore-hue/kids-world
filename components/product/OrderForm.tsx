@@ -243,33 +243,35 @@ export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
           )}
         </div>
 
-        {/* Commune */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            البلدية <span className="text-red-500">*</span>
-          </label>
-          <select
-            {...register("commune")}
-            disabled={communes.length === 0}
-            className={`input-field ${errors.commune ? "input-error" : ""} disabled:opacity-50`}
-          >
-            <option value="">
-              {communes.length === 0
-                ? "— اختر الولاية أولاً —"
-                : "— اختر البلدية —"}
-            </option>
-            {communes.map((c) => (
-              <option key={c} value={c}>
-                {c}
+        {/* Commune - only for home delivery */}
+        {watchedDeliveryType === "home" && (
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              البلدية <span className="text-red-500">*</span>
+            </label>
+            <select
+              {...register("commune")}
+              disabled={communes.length === 0}
+              className={`input-field ${errors.commune ? "input-error" : ""} disabled:opacity-50`}
+            >
+              <option value="">
+                {communes.length === 0
+                  ? "— اختر الولاية أولاً —"
+                  : "— اختر البلدية —"}
               </option>
-            ))}
-          </select>
-          {errors.commune && (
-            <p className="text-red-500 text-xs mt-1">
-              {errors.commune.message}
-            </p>
-          )}
-        </div>
+              {communes.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+            {errors.commune && (
+              <p className="text-red-500 text-xs mt-1">
+                {errors.commune.message}
+              </p>
+            )}
+          </div>
+        )}
 
         {/* Delivery Type */}
         <div>

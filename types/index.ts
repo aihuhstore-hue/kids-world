@@ -176,7 +176,7 @@ export const orderFormSchema = z.object({
       "رقم الهاتف غير صحيح — يجب أن يبدأ بـ 05 أو 06 أو 07 ويتكون من 10 أرقام"
     ),
   wilayaCode: z.string().min(1, "يرجى اختيار الولاية"),
-  commune: z.string().min(1, "يرجى اختيار البلدية"),
+  commune: z.string().optional().default(""),
   deliveryType: z.enum(["home", "office"], {
     required_error: "يرجى اختيار نوع التوصيل",
   }),
