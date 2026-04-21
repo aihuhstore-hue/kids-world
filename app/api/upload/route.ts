@@ -49,13 +49,13 @@ export async function POST(req: NextRequest) {
     if (!res.ok) {
       const err = await res.json();
       console.error("Cloudinary error:", err);
-      return NextResponse.json({ error: "فشل رفع الصورة" }, { status: 500 });
+      return NextResponse.json({ error: `Cloudinary: ${err?.error?.message ?? JSON.stringify(err)}` }, { status: 500 });
     }
 
     const data = await res.json();
     return NextResponse.json({ url: data.secure_url });
   } catch (err) {
     console.error("Upload error:", err);
-    return NextResponse.json({ error: "حدث خطأ أثناء رفع الصورة" }, { status: 500 });
+    return NextResponse.json({ error: `خطأ: ${(err as Error).message ?? String(err)}` }, { status: 500 });
   }
 }
