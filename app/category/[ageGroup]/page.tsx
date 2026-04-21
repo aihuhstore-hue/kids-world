@@ -6,6 +6,7 @@ import ProductCard from "@/components/product/ProductCard";
 import { prisma } from "@/lib/prisma";
 import { parseProduct } from "@/lib/utils";
 import { AGE_GROUP_SLUG, AGE_GROUP_LABELS, AGE_GROUP_EMOJI } from "@/types";
+import SortSelect from "./SortSelect";
 
 interface Props {
   params: Promise<{ ageGroup: string }>;
@@ -107,19 +108,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
 
             <div className="mr-auto flex items-center gap-2">
               <span className="text-sm text-gray-500">الترتيب:</span>
-              <select
-                defaultValue={sort}
-                onChange={(e) => {
-                  const url = new URL(window.location.href);
-                  url.searchParams.set("sort", e.target.value);
-                  window.location.href = url.toString();
-                }}
-                className="text-sm border border-gray-200 rounded-xl px-3 py-2 focus:outline-none focus:border-secondary-400"
-              >
-                <option value="newest">الأحدث</option>
-                <option value="price-asc">السعر: الأقل</option>
-                <option value="price-desc">السعر: الأعلى</option>
-              </select>
+              <SortSelect sort={sort} ageGroup={ageGroup} typeFilter={typeFilter} />
             </div>
           </div>
 

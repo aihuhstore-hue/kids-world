@@ -10,7 +10,7 @@ const createOrderSchema = z.object({
   phone: z.string().regex(/^(05|06|07)\d{8}$/),
   wilayaCode: z.string().min(1),
   wilayaName: z.string().min(1),
-  commune: z.string().min(1),
+  commune: z.string().optional().default(""),
   deliveryType: z.enum(["home", "office"]),
   address: z.string().min(1),
   notes: z.string().optional(),
