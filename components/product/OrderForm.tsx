@@ -356,18 +356,6 @@ export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
           )}
         </div>
 
-        {/* Notes */}
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            ملاحظات (اختياري)
-          </label>
-          <textarea
-            {...register("notes")}
-            rows={2}
-            placeholder="أي تعليمات إضافية للتوصيل..."
-            className="input-field resize-none"
-          />
-        </div>
 
         {/* ── Promo Code ── */}
         {showPromoCode && <div className="border border-dashed border-gray-200 rounded-2xl p-3">
