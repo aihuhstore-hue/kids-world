@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Eye, EyeOff, Lock, CheckCircle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Eye, EyeOff, Lock, CheckCircle, Ticket } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function AdminSettings() {
@@ -13,37 +13,59 @@ export default function AdminSettings() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [showPromoCode, setShowPromoCode] = useState(true);
+  const [savingPromo, setSavingPromo] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.showPromoCode !== undefined) {
+          setShowPromoCode(data.showPromoCode === "true");
+        }
+      });
+  }, []);
+
+  const handleTogglePromo = async (val: boolean) => {
+    setShowPromoCode(val);
+    setSavingPromo(true);
+    const password = sessionStorage.getItem("admin-password") ?? "";
+    try {
+      await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        body: JSON.stringify({ showPromoCode: String(val) }),
+      });
+      toast.success(val ? "تم تفعيل كود الخصم ✅" : "تم إخفاء كود الخصم ✅");
+    } catch {
+      toast.error("حدث خطأ");
+    } finally {
+      setSavingPromo(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (newPassword !== confirmPassword) {
       toast.error("كلمة السر الجديدة وتأكيدها غير متطابقتين");
       return;
     }
-
     if (newPassword.length < 4) {
       toast.error("كلمة السر يجب أن تكون 4 أحرف على الأقل");
       return;
     }
-
     setLoading(true);
-
     try {
       const res = await fetch("/api/admin/password", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ currentPassword, newPassword }),
       });
-
       const data = await res.json();
-
       if (!res.ok) {
         toast.error(data.error ?? "حدث خطأ");
         return;
       }
-
-      // تحديث كلمة السر في الجلسة
       sessionStorage.setItem("admin-password", newPassword);
       setSuccess(true);
       setCurrentPassword("");
@@ -58,7 +80,44 @@ export default function AdminSettings() {
   };
 
   return (
-    <div className="max-w-md">
+    <div className="max-w-md space-y-5">
+      {/* إعدادات الموقع */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
+          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
+            <Ticket className="w-5 h-5 text-blue-600" />
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-800">إعدادات الموقع</h2>
+            <p className="text-sm text-gray-400">التحكم في عناصر صفحة الطلب</p>
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+          <div>
+            <p className="font-semibold text-gray-700 text-sm">كود الخصم</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {showPromoCode ? "يظهر حقل كود الخصم في صفحة الطلب" : "مخفي من صفحة الطلب"}
+            </p>
+          </div>
+          <button
+            type="button"
+            disabled={savingPromo}
+            onClick={() => handleTogglePromo(!showPromoCode)}
+            className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${
+              showPromoCode ? "bg-green-500" : "bg-gray-300"
+            } ${savingPromo ? "opacity-50" : ""}`}
+          >
+            <div
+              className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                showPromoCode ? "right-1" : "left-1"
+              }`}
+            />
+          </button>
+        </div>
+      </div>
+
+      {/* تغيير كلمة السر */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
           <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
@@ -78,7 +137,6 @@ export default function AdminSettings() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* كلمة السر الحالية */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               كلمة السر الحالية <span className="text-red-500">*</span>
@@ -102,7 +160,6 @@ export default function AdminSettings() {
             </div>
           </div>
 
-          {/* كلمة السر الجديدة */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               كلمة السر الجديدة <span className="text-red-500">*</span>
@@ -129,7 +186,6 @@ export default function AdminSettings() {
             )}
           </div>
 
-          {/* تأكيد كلمة السر */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               تأكيد كلمة السر الجديدة <span className="text-red-500">*</span>
@@ -142,9 +198,7 @@ export default function AdminSettings() {
                 required
                 placeholder="أعد كتابة كلمة السر الجديدة"
                 className={`input-field pl-10 ${
-                  confirmPassword && confirmPassword !== newPassword
-                    ? "input-error"
-                    : ""
+                  confirmPassword && confirmPassword !== newPassword ? "input-error" : ""
                 }`}
               />
               <button

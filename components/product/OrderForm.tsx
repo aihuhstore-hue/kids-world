@@ -30,6 +30,15 @@ export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
   const [deliveryFee, setDeliveryFee] = useState(0);
   const [selectedWilaya, setSelectedWilaya] = useState<string>("");
 
+  const [showPromoCode, setShowPromoCode] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => setShowPromoCode(data.showPromoCode === "true"))
+      .catch(() => setShowPromoCode(false));
+  }, []);
+
   // Promo code state
   const [promoInput, setPromoInput] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
@@ -354,7 +363,7 @@ export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
         </div>
 
         {/* ── Promo Code ── */}
-        <div className="border border-dashed border-gray-200 rounded-2xl p-3">
+        {showPromoCode && <div className="border border-dashed border-gray-200 rounded-2xl p-3">
           <p className="text-xs font-semibold text-gray-500 mb-2 flex items-center gap-1">
             <Ticket className="w-3.5 h-3.5" />
             كود الخصم (اختياري)
@@ -414,7 +423,7 @@ export default function OrderForm({ product, quantity = 1 }: OrderFormProps) {
           {promoError && (
             <p className="text-red-500 text-xs mt-1.5">{promoError}</p>
           )}
-        </div>
+        </div>}
 
         {/* Order Summary */}
         <div className="bg-gray-50 rounded-2xl p-4 space-y-2">
