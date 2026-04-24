@@ -1,7 +1,24 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail, Facebook, Instagram, Star } from "lucide-react";
+import { prisma } from "@/lib/prisma";
 
-export default function Footer() {
+async function getSocialLinks() {
+  try {
+    const settings = await prisma.setting.findMany({
+      where: { key: { in: ["fb_page_url", "instagram_url"] } },
+    });
+    const s: Record<string, string> = {};
+    for (const row of settings) s[row.key] = row.value;
+    return s;
+  } catch {
+    return {};
+  }
+}
+
+export default async function Footer() {
+  const social = await getSocialLinks();
+  const fbUrl = social.fb_page_url?.trim() || "#";
+  const igUrl = social.instagram_url?.trim() || "#";
   return (
     <footer className="bg-gray-900 text-white">
       {/* Top section */}
@@ -24,14 +41,20 @@ export default function Footer() {
             </p>
             <div className="flex items-center gap-3 mt-4">
               <a
-                href="#"
-                className="w-8 h-8 bg-gray-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors"
+                href={fbUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 bg-gray-800 hover:bg-blue-600 rounded-xl flex items-center justify-center transition-colors"
+                title="Facebook"
               >
                 <Facebook className="w-4 h-4" />
               </a>
               <a
-                href="#"
-                className="w-8 h-8 bg-gray-800 hover:bg-pink-500 rounded-lg flex items-center justify-center transition-colors"
+                href={igUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-9 h-9 bg-gray-800 hover:bg-gradient-to-br rounded-xl flex items-center justify-center transition-all hover:bg-pink-500"
+                title="Instagram"
               >
                 <Instagram className="w-4 h-4" />
               </a>

@@ -54,6 +54,17 @@ const INTEGRATIONS = [
       { key: "ga_id", label: "Measurement ID", placeholder: "G-XXXXXXXXXX", hint: "من Google Analytics → Admin → Data Streams" },
     ] as IntegrationField[],
   },
+  {
+    id: "social",
+    title: "روابط التواصل الاجتماعي",
+    emoji: "🔗",
+    color: "from-purple-500 to-pink-500",
+    glow: "rgba(168,85,247,0.25)",
+    fields: [
+      { key: "fb_page_url", label: "رابط صفحة Facebook", placeholder: "https://facebook.com/kidsworldj", hint: "يظهر في أسفل الموقع" },
+      { key: "instagram_url", label: "رابط حساب Instagram", placeholder: "https://instagram.com/kidsworldj", hint: "يظهر في أسفل الموقع" },
+    ] as IntegrationField[],
+  },
 ];
 
 export default function IntegrationsPage() {
