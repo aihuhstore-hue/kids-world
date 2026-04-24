@@ -14,6 +14,8 @@ import {
   Settings,
   Ticket,
   CheckCircle,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 const navLinks = [
@@ -36,6 +38,7 @@ export default function AdminLayout({
   const [error, setError] = useState("");
   const [loginLoading, setLoginLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("admin-auth");
@@ -68,38 +71,156 @@ export default function AdminLayout({
 
   if (!authenticated) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-        <div className="bg-white rounded-3xl p-8 w-full max-w-sm shadow-2xl">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-primary-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
-              <BookOpen className="w-8 h-8 text-primary-500" />
+      <div className="min-h-screen flex items-center justify-center p-4 overflow-hidden relative"
+        style={{ background: "linear-gradient(135deg, #0f0c29 0%, #1a1a4e 40%, #24243e 100%)" }}>
+
+        {/* نجوم خلفية */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          {[...Array(20)].map((_, i) => (
+            <div key={i} className="absolute rounded-full bg-white"
+              style={{
+                width: Math.random() * 3 + 1 + "px",
+                height: Math.random() * 3 + 1 + "px",
+                top: Math.random() * 100 + "%",
+                left: Math.random() * 100 + "%",
+                opacity: Math.random() * 0.7 + 0.2,
+                animation: `pulse ${Math.random() * 3 + 2}s ease-in-out infinite`,
+              }}
+            />
+          ))}
+        </div>
+
+        {/* أيقونات عائمة */}
+        <div className="absolute inset-0 pointer-events-none select-none">
+          <span className="absolute text-3xl opacity-20 animate-bounce" style={{ top: "10%", left: "8%", animationDelay: "0s", animationDuration: "3s" }}>🎨</span>
+          <span className="absolute text-3xl opacity-20 animate-bounce" style={{ top: "20%", right: "6%", animationDelay: "0.5s", animationDuration: "4s" }}>📚</span>
+          <span className="absolute text-4xl opacity-15 animate-bounce" style={{ bottom: "20%", left: "5%", animationDelay: "1s", animationDuration: "3.5s" }}>🧸</span>
+          <span className="absolute text-3xl opacity-20 animate-bounce" style={{ bottom: "15%", right: "8%", animationDelay: "1.5s", animationDuration: "4.5s" }}>✏️</span>
+          <span className="absolute text-2xl opacity-15 animate-bounce" style={{ top: "50%", left: "3%", animationDelay: "0.8s", animationDuration: "5s" }}>⭐</span>
+          <span className="absolute text-2xl opacity-15 animate-bounce" style={{ top: "40%", right: "3%", animationDelay: "2s", animationDuration: "3s" }}>🌟</span>
+        </div>
+
+        {/* توهجات ملونة */}
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(124,58,237,0.15) 0%, transparent 70%)" }} />
+        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle, rgba(59,130,246,0.12) 0%, transparent 70%)" }} />
+
+        {/* البطاقة */}
+        <div className="relative w-full max-w-sm z-10"
+          style={{
+            background: "linear-gradient(145deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)",
+            backdropFilter: "blur(20px)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            borderRadius: "28px",
+            boxShadow: "0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
+          }}>
+
+          {/* شريط علوي ملون */}
+          <div className="h-1.5 w-full rounded-t-3xl"
+            style={{ background: "linear-gradient(90deg, #f59e0b, #8b5cf6, #3b82f6, #10b981)" }} />
+
+          <div className="p-8">
+            {/* اللوغو */}
+            <div className="text-center mb-8">
+              <div className="relative inline-block mb-4">
+                <div className="w-20 h-20 rounded-2xl flex items-center justify-center mx-auto"
+                  style={{
+                    background: "linear-gradient(135deg, #f59e0b, #f97316)",
+                    boxShadow: "0 8px 24px rgba(245,158,11,0.4), 0 4px 8px rgba(0,0,0,0.3)",
+                    transform: "rotate(-3deg)",
+                  }}>
+                  <BookOpen className="w-10 h-10 text-white" style={{ transform: "rotate(3deg)" }} />
+                </div>
+                <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-400 rounded-full border-2 border-gray-900 flex items-center justify-center">
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
+                </div>
+              </div>
+              <h1 className="text-2xl font-black text-white mb-1"
+                style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
+                لوحة التحكم
+              </h1>
+              <p className="text-sm font-medium"
+                style={{ color: "rgba(253,186,116,0.9)" }}>
+                🌟 عالم الأطفال
+              </p>
             </div>
-            <h1 className="text-2xl font-black">لوحة الأدمن</h1>
-            <p className="text-gray-500 text-sm mt-1">عالم الأطفال</p>
+
+            {/* الفورم */}
+            <form onSubmit={handleLogin} className="space-y-5">
+              <div>
+                <label className="block text-xs font-bold mb-2 tracking-wider uppercase"
+                  style={{ color: "rgba(196,181,253,0.8)" }}>
+                  كلمة المرور
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    autoFocus
+                    className="w-full px-4 py-3.5 pr-12 rounded-2xl text-white placeholder-gray-500 outline-none transition-all text-sm"
+                    style={{
+                      background: "rgba(255,255,255,0.07)",
+                      border: "1px solid rgba(255,255,255,0.1)",
+                      boxShadow: "inset 0 2px 8px rgba(0,0,0,0.3)",
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.border = "1px solid rgba(139,92,246,0.6)";
+                      e.target.style.boxShadow = "inset 0 2px 8px rgba(0,0,0,0.3), 0 0 0 3px rgba(139,92,246,0.15)";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.border = "1px solid rgba(255,255,255,0.1)";
+                      e.target.style.boxShadow = "inset 0 2px 8px rgba(0,0,0,0.3)";
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+                {error && (
+                  <div className="flex items-center gap-2 mt-2 px-3 py-2 rounded-xl"
+                    style={{ background: "rgba(239,68,68,0.15)", border: "1px solid rgba(239,68,68,0.3)" }}>
+                    <span className="text-red-400 text-xs">{error}</span>
+                  </div>
+                )}
+              </div>
+
+              <button
+                type="submit"
+                disabled={loginLoading}
+                className="w-full py-3.5 rounded-2xl font-black text-white text-sm transition-all duration-200 disabled:opacity-50"
+                style={{
+                  background: "linear-gradient(135deg, #7c3aed, #4f46e5)",
+                  boxShadow: "0 8px 24px rgba(124,58,237,0.4), 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)",
+                  transform: loginLoading ? "scale(0.98)" : "scale(1)",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.02) translateY(-1px)"; e.currentTarget.style.boxShadow = "0 12px 32px rgba(124,58,237,0.5), 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; e.currentTarget.style.boxShadow = "0 8px 24px rgba(124,58,237,0.4), 0 4px 8px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2)"; }}
+                onMouseDown={(e) => { e.currentTarget.style.transform = "scale(0.98) translateY(1px)"; }}
+                onMouseUp={(e) => { e.currentTarget.style.transform = "scale(1.02) translateY(-1px)"; }}
+              >
+                {loginLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <svg className="animate-spin w-4 h-4" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    جاري التحقق...
+                  </span>
+                ) : "🚀 دخول"}
+              </button>
+            </form>
+
+            <p className="text-center text-xs mt-6" style={{ color: "rgba(255,255,255,0.2)" }}>
+              عالم الأطفال © {new Date().getFullYear()}
+            </p>
           </div>
-          <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                كلمة المرور
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="أدخل كلمة المرور"
-                className="input-field"
-                autoFocus
-              />
-              {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-            </div>
-            <button
-              type="submit"
-              disabled={loginLoading}
-              className="w-full btn-primary disabled:opacity-60"
-            >
-              {loginLoading ? "جاري التحقق..." : "دخول"}
-            </button>
-          </form>
         </div>
       </div>
     );
