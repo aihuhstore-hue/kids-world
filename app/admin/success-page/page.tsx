@@ -29,6 +29,7 @@ export default function SuccessPageSettings() {
           success_title: data.success_title || "تم تأكيد طلبك! 🎉",
           success_message: data.success_message || "شكراً لك! سيتصل بك فريقنا خلال 24 ساعة لتأكيد الطلب",
           success_image: data.success_image || "",
+          success_show_steps: data.success_show_steps || "true",
           success_step1: data.success_step1 || "سيتصل بك مستشارنا لتأكيد الطلب",
           success_step2: data.success_step2 || "يتم تحضير وشحن طلبك خلال 24-48 ساعة",
           success_step3: data.success_step3 || "يصلك طلبك خلال 2-5 أيام عمل",
