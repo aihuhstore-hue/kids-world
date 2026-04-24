@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Loader2, Eye, EyeOff, CheckCircle, Zap } from "lucide-react";
+import { Save, Loader2, Eye, EyeOff, CheckCircle, Zap, Trash2 } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface IntegrationField {
@@ -127,10 +127,36 @@ export default function IntegrationsPage() {
             <span className="text-2xl">{integration.emoji}</span>
             <h3 className="font-black text-white text-base">{integration.title}</h3>
             {values[integration.fields[0].key] && (
-              <span className="mr-auto text-xs px-2.5 py-1 rounded-full font-bold"
-                style={{ background: "rgba(255,255,255,0.2)", color: "#fff" }}>
-                ✓ مُفعَّل
-              </span>
+              <>
+                <span className="mr-auto text-xs px-2.5 py-1 rounded-full font-bold"
+                  style={{ background: "rgba(255,255,255,0.2)", color: "#fff" }}>
+                  ✓ مُفعَّل
+                </span>
+                <button
+                  type="button"
+                  title="حذف جميع بيانات هذه المنصة"
+                  onClick={async () => {
+                    if (!confirm(`هل تريد حذف إعدادات ${integration.title} ؟`)) return;
+                    const cleared: Record<string, string> = {};
+                    integration.fields.forEach((f) => { cleared[f.key] = ""; });
+                    setValues((p) => ({ ...p, ...cleared }));
+                    const password = sessionStorage.getItem("admin-password") ?? "";
+                    await fetch("/api/settings", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json", "x-admin-password": password },
+                      body: JSON.stringify(cleared),
+                    });
+                    toast.success(`تم حذف إعدادات ${integration.title}`);
+                  }}
+                  className="text-xs px-2.5 py-1 rounded-full font-bold flex items-center gap-1 transition-colors"
+                  style={{ background: "rgba(239,68,68,0.25)", color: "#fca5a5" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.45)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.25)"; }}
+                >
+                  <Trash2 className="w-3 h-3" />
+                  حذف
+                </button>
+              </>
             )}
           </div>
 
@@ -144,21 +170,33 @@ export default function IntegrationsPage() {
                 {field.hint && (
                   <p className="text-xs text-gray-400 mb-1.5">{field.hint}</p>
                 )}
-                <div className="relative">
-                  <input
-                    type={field.secret && !shown[field.key] ? "password" : "text"}
-                    value={values[field.key] ?? ""}
-                    onChange={(e) => setValues((p) => ({ ...p, [field.key]: e.target.value }))}
-                    placeholder={field.placeholder}
-                    dir="ltr"
-                    className="input-field text-sm font-mono"
-                    style={{ paddingLeft: field.secret ? "2.5rem" : undefined }}
-                  />
-                  {field.secret && (
-                    <button type="button"
-                      onClick={() => setShown((p) => ({ ...p, [field.key]: !p[field.key] }))}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
-                      {shown[field.key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                <div className="relative flex items-center gap-2">
+                  <div className="relative flex-1">
+                    <input
+                      type={field.secret && !shown[field.key] ? "password" : "text"}
+                      value={values[field.key] ?? ""}
+                      onChange={(e) => setValues((p) => ({ ...p, [field.key]: e.target.value }))}
+                      placeholder={field.placeholder}
+                      dir="ltr"
+                      className="input-field text-sm font-mono w-full"
+                      style={{ paddingLeft: field.secret ? "2.5rem" : undefined }}
+                    />
+                    {field.secret && (
+                      <button type="button"
+                        onClick={() => setShown((p) => ({ ...p, [field.key]: !p[field.key] }))}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                        {shown[field.key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    )}
+                  </div>
+                  {values[field.key] && (
+                    <button
+                      type="button"
+                      title="حذف"
+                      onClick={() => setValues((p) => ({ ...p, [field.key]: "" }))}
+                      className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-xl bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 transition-colors border border-red-100"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   )}
                 </div>
