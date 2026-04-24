@@ -63,6 +63,8 @@ const INTEGRATIONS = [
     fields: [
       { key: "fb_page_url", label: "رابط صفحة Facebook", placeholder: "https://facebook.com/kidsworldj", hint: "يظهر في أسفل الموقع" },
       { key: "instagram_url", label: "رابط حساب Instagram", placeholder: "https://instagram.com/kidsworldj", hint: "يظهر في أسفل الموقع" },
+      { key: "tiktok_page_url", label: "رابط حساب TikTok", placeholder: "https://tiktok.com/@kidsworldj", hint: "يظهر في أسفل الموقع" },
+      { key: "whatsapp_number", label: "رقم WhatsApp", placeholder: "213555123456", hint: "الرقم بدون + مثلاً 213555123456 — يظهر في أسفل الموقع" },
     ] as IntegrationField[],
   },
 ];
