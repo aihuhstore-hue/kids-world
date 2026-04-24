@@ -65,8 +65,6 @@ export default async function ProductPage({ params }: Props) {
                 images={product.images}
                 productName={product.name}
                 discount={discount}
-                showStock={product.showStock}
-                stock={product.stock}
               />
 
               {/* Product Details */}

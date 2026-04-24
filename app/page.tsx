@@ -13,7 +13,7 @@ export const revalidate = 60;
 async function getBestSellers() {
   try {
     const products = await prisma.product.findMany({
-      where: { isActive: true, stock: { gt: 0 } },
+      where: { isActive: true },
       take: 8,
       orderBy: { createdAt: "desc" },
     });

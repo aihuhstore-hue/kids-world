@@ -2,17 +2,14 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { AlertTriangle } from "lucide-react";
 
 interface ImageGalleryProps {
   images: string[];
   productName: string;
   discount: number | null;
-  showStock: boolean;
-  stock: number;
 }
 
-export default function ImageGallery({ images, productName, discount, showStock, stock }: ImageGalleryProps) {
+export default function ImageGallery({ images, productName, discount }: ImageGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const mainImage = images[activeIndex] ?? images[0] ?? "https://picsum.photos/600/600";
@@ -30,12 +27,6 @@ export default function ImageGallery({ images, productName, discount, showStock,
         {discount && (
           <div className="absolute top-4 right-4 bg-red-500 text-white font-black text-lg px-3 py-1 rounded-2xl shadow">
             -{discount}%
-          </div>
-        )}
-        {showStock && stock <= 5 && stock > 0 && (
-          <div className="absolute bottom-4 left-4 bg-orange-400 text-white text-sm font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow">
-            <AlertTriangle className="w-4 h-4" />
-            بقيت {stock} قطع فقط!
           </div>
         )}
       </div>

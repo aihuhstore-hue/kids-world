@@ -50,11 +50,6 @@ export default function ProductCard({ product }: ProductCardProps) {
                 خصم!
               </span>
             )}
-            {product.stock <= 5 && product.stock > 0 && (
-              <span className="bg-orange-400 text-white text-xs font-bold px-2 py-1 rounded-lg">
-                آخر {product.stock}!
-              </span>
-            )}
           </div>
 
           {/* Type badge */}

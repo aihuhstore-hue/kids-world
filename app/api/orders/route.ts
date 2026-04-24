@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = createOrderSchema.parse(body);
 
-    // التحقق من المنتجات والمخزون
+    // التحقق من وجود المنتجات فقط
     for (const item of data.items) {
       const product = await prisma.product.findUnique({
         where: { id: item.productId },
@@ -41,12 +41,6 @@ export async function POST(req: NextRequest) {
       if (!product) {
         return NextResponse.json(
           { error: `المنتج غير موجود: ${item.productId}` },
-          { status: 400 }
-        );
-      }
-      if (product.stock < item.quantity) {
-        return NextResponse.json(
-          { error: `المخزون غير كافٍ للمنتج: ${product.name}` },
           { status: 400 }
         );
       }
@@ -94,14 +88,6 @@ export async function POST(req: NextRequest) {
         },
         include: { items: true },
       });
-
-      // تخفيض المخزون
-      for (const item of data.items) {
-        await tx.product.update({
-          where: { id: item.productId },
-          data: { stock: { decrement: item.quantity } },
-        });
-      }
 
       // زيادة عداد استخدام الكود
       if (promoId) {
