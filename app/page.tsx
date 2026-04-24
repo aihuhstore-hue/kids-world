@@ -15,9 +15,13 @@ async function getBestSellers() {
     const products = await prisma.product.findMany({
       where: { isActive: true },
       take: 8,
-      orderBy: { createdAt: "desc" },
+      orderBy: { orderItems: { _count: "desc" } },
+      include: { _count: { select: { orderItems: true } } },
     });
-    return products.map(parseProduct);
+    return products.map((p) => ({
+      ...parseProduct(p),
+      salesCount: p._count.orderItems,
+    }));
   } catch {
     return [];
   }
