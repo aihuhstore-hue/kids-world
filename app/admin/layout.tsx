@@ -233,59 +233,101 @@ export default function AdminLayout({
     );
   }
 
+  const activeLabel = navLinks.find(
+    (l) => l.href === pathname || (l.href !== "/admin" && pathname.startsWith(l.href))
+  )?.label ?? "لوحة التحكم";
+
+  const navColors: Record<string, string> = {
+    "/admin": "from-violet-500 to-purple-600",
+    "/admin/products": "from-blue-500 to-cyan-500",
+    "/admin/orders": "from-amber-500 to-orange-500",
+    "/admin/promo": "from-pink-500 to-rose-500",
+    "/admin/success-page": "from-emerald-500 to-teal-500",
+    "/admin/settings": "from-slate-500 to-gray-600",
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 flex" dir="rtl">
+    <div className="min-h-screen flex" dir="rtl" style={{ background: "#0f1117" }}>
+
       {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 right-0 w-64 bg-gray-900 text-white z-40 transform transition-transform duration-300 ${
-          sidebarOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"
-        }`}
-      >
-        <div className="p-4 border-b border-gray-800">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary-300 rounded-xl flex items-center justify-center">
-              <BookOpen className="w-4 h-4 text-gray-900" />
+      <aside className={`fixed inset-y-0 right-0 w-64 z-40 flex flex-col transition-transform duration-300 ease-in-out ${
+        sidebarOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"
+      }`}
+        style={{
+          background: "linear-gradient(180deg, #13151f 0%, #0d0f18 100%)",
+          borderLeft: "1px solid rgba(255,255,255,0.06)",
+          boxShadow: "-8px 0 32px rgba(0,0,0,0.4)",
+        }}>
+
+        {/* لوغو */}
+        <div className="p-5 mb-2">
+          <div className="flex items-center gap-3 px-3 py-3 rounded-2xl"
+            style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)" }}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #f59e0b, #f97316)", boxShadow: "0 4px 12px rgba(245,158,11,0.35)" }}>
+              <BookOpen className="w-5 h-5 text-white" />
             </div>
-            <div>
-              <p className="font-bold text-sm">عالم الأطفال</p>
-              <p className="text-gray-400 text-xs">لوحة التحكم</p>
+            <div className="min-w-0">
+              <p className="font-black text-sm leading-none"
+                style={{ background: "linear-gradient(90deg, #f59e0b, #a78bfa)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                kids world j
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.3)" }}>لوحة التحكم</p>
+            </div>
+            <div className="mr-auto flex-shrink-0">
+              <div className="w-2 h-2 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 6px #34d399" }} />
             </div>
           </div>
         </div>
 
-        <nav className="p-4 space-y-1">
+        {/* قائمة */}
+        <nav className="flex-1 px-3 space-y-1 overflow-y-auto">
+          <p className="text-xs font-bold px-3 mb-3 tracking-widest uppercase" style={{ color: "rgba(255,255,255,0.2)" }}>
+            القائمة
+          </p>
           {navLinks.map((link) => {
-            const isActive =
-              link.href === "/admin"
-                ? pathname === "/admin"
-                : pathname.startsWith(link.href);
+            const isActive = link.href === "/admin" ? pathname === "/admin" : pathname.startsWith(link.href);
+            const gradient = navColors[link.href] ?? "from-violet-500 to-purple-600";
             return (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setSidebarOpen(false)}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors text-sm font-medium ${
-                  isActive
-                    ? "bg-primary-300 text-gray-900"
-                    : "text-gray-400 hover:bg-gray-800 hover:text-white"
-                }`}
+              <Link key={link.href} href={link.href} onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200 group relative overflow-hidden"
+                style={isActive ? {
+                  background: "rgba(255,255,255,0.08)",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  boxShadow: "0 4px 16px rgba(0,0,0,0.2)",
+                  color: "#fff",
+                } : {
+                  color: "rgba(255,255,255,0.4)",
+                  border: "1px solid transparent",
+                }}
+                onMouseEnter={(e) => { if (!isActive) { e.currentTarget.style.background = "rgba(255,255,255,0.04)"; e.currentTarget.style.color = "rgba(255,255,255,0.8)"; }}}
+                onMouseLeave={(e) => { if (!isActive) { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.4)"; }}}
               >
-                <link.icon className="w-4 h-4" />
-                {link.label}
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 bg-gradient-to-br ${gradient} transition-all duration-200`}
+                  style={{ opacity: isActive ? 1 : 0.5, boxShadow: isActive ? "0 4px 12px rgba(0,0,0,0.3)" : "none" }}>
+                  <link.icon className="w-4 h-4 text-white" />
+                </div>
+                <span>{link.label}</span>
+                {isActive && (
+                  <div className="mr-auto w-1.5 h-1.5 rounded-full bg-white" style={{ boxShadow: "0 0 6px #fff" }} />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-4 left-4 right-4">
-          <button
-            onClick={() => {
-              sessionStorage.clear();
-              setAuthenticated(false);
-            }}
-            className="flex items-center gap-2 text-gray-500 hover:text-red-400 transition-colors text-sm w-full px-3 py-2"
+        {/* خروج */}
+        <div className="p-4 mt-2">
+          <button onClick={() => { sessionStorage.clear(); setAuthenticated(false); }}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200"
+            style={{ color: "rgba(255,255,255,0.3)", border: "1px solid transparent" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; e.currentTarget.style.color = "#f87171"; e.currentTarget.style.border = "1px solid rgba(239,68,68,0.2)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "rgba(255,255,255,0.3)"; e.currentTarget.style.border = "1px solid transparent"; }}
           >
-            <LogOut className="w-4 h-4" />
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0"
+              style={{ background: "rgba(239,68,68,0.15)" }}>
+              <LogOut className="w-4 h-4 text-red-400" />
+            </div>
             تسجيل الخروج
           </button>
         </div>
@@ -293,38 +335,45 @@ export default function AdminLayout({
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-30 md:hidden" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+          onClick={() => setSidebarOpen(false)} />
       )}
 
-      {/* Main content */}
-      <div className="flex-1 md:mr-64">
-        {/* Top bar */}
-        <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center gap-3 sticky top-0 z-20">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden p-1.5 hover:bg-gray-100 rounded-lg"
+      {/* المحتوى */}
+      <div className="flex-1 md:mr-64 flex flex-col min-h-screen" style={{ background: "#f8f9fc" }}>
+
+        {/* Header */}
+        <header className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3"
+          style={{ background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 1px 12px rgba(0,0,0,0.06)" }}>
+          <button onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
+            style={{ background: "rgba(0,0,0,0.05)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.1)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; }}
           >
-            {sidebarOpen ? (
-              <X className="w-5 h-5" />
-            ) : (
-              <Menu className="w-5 h-5" />
-            )}
+            {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
           </button>
-          <h1 className="font-bold text-gray-800">
-            {navLinks.find(
-              (l) =>
-                l.href === pathname ||
-                (l.href !== "/admin" && pathname.startsWith(l.href))
-            )?.label ?? "لوحة التحكم"}
-          </h1>
-          <Link
-            href="/"
-            className="mr-auto text-sm text-gray-400 hover:text-gray-600"
+
+          <div className="flex items-center gap-2">
+            {(() => {
+              const active = navLinks.find((l) => l.href === pathname || (l.href !== "/admin" && pathname.startsWith(l.href)));
+              const gradient = active ? (navColors[active.href] ?? "from-violet-500 to-purple-600") : "from-violet-500 to-purple-600";
+              return active ? (
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${gradient}`}>
+                  <active.icon className="w-3.5 h-3.5 text-white" />
+                </div>
+              ) : null;
+            })()}
+            <h1 className="font-black text-gray-800 text-base">{activeLabel}</h1>
+          </div>
+
+          <Link href="/" className="mr-auto flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200"
+            style={{ color: "rgba(0,0,0,0.4)", background: "rgba(0,0,0,0.04)" }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.08)"; e.currentTarget.style.color = "rgba(0,0,0,0.7)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.04)"; e.currentTarget.style.color = "rgba(0,0,0,0.4)"; }}
           >
-            عرض الموقع ←
+            عرض الموقع
+            <span style={{ fontSize: "10px" }}>←</span>
           </Link>
         </header>
 
