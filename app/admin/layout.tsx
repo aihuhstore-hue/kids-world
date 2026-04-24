@@ -340,7 +340,7 @@ export default function AdminLayout({
       )}
 
       {/* المحتوى */}
-      <div className="flex-1 md:mr-64 flex flex-col min-h-screen" style={{ background: "#f8f9fc" }}>
+      <div className="flex-1 md:mr-64 flex flex-col min-h-screen" style={{ background: "#f1f3f9" }}>
 
         {/* Header */}
         <header className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3"
