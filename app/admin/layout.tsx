@@ -149,7 +149,7 @@ export default function AdminLayout({
               </h1>
               <p className="text-sm font-medium"
                 style={{ color: "rgba(253,186,116,0.9)" }}>
-                🌟 عالم الأطفال
+                👦🏻 عالم الأطفال
               </p>
             </div>
 
