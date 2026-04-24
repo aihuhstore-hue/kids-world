@@ -116,9 +116,6 @@ export default function AdminLayout({
             boxShadow: "0 32px 64px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.05), inset 0 1px 0 rgba(255,255,255,0.1)",
           }}>
 
-          {/* شريط علوي ملون */}
-          <div className="h-1.5 w-full rounded-t-3xl"
-            style={{ background: "linear-gradient(90deg, #f59e0b, #8b5cf6, #3b82f6, #10b981)" }} />
 
           <div className="p-8">
             {/* اللوغو */}
