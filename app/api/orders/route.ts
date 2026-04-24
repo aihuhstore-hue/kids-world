@@ -100,6 +100,39 @@ export async function POST(req: NextRequest) {
       return newOrder;
     });
 
+    // Facebook Conversions API
+    try {
+      const fbSettings = await prisma.setting.findMany({
+        where: { key: { in: ["fb_pixel_id", "fb_access_token"] } },
+      });
+      const fbPixelId = fbSettings.find((s) => s.key === "fb_pixel_id")?.value?.trim();
+      const fbToken = fbSettings.find((s) => s.key === "fb_access_token")?.value?.trim();
+
+      if (fbPixelId && fbToken) {
+        const eventTime = Math.floor(Date.now() / 1000);
+        await fetch(`https://graph.facebook.com/v18.0/${fbPixelId}/events?access_token=${fbToken}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            data: [{
+              event_name: "Purchase",
+              event_time: eventTime,
+              action_source: "website",
+              user_data: {
+                ph: [data.phone],
+              },
+              custom_data: {
+                currency: "DZD",
+                value: data.total,
+                order_id: order.orderNumber,
+                num_items: data.items.reduce((s: number, i: { quantity: number }) => s + i.quantity, 0),
+              },
+            }],
+          }),
+        }).catch(() => {});
+      }
+    } catch { /* لا نوقف الطلب إذا فشل الإرسال */ }
+
     return NextResponse.json(
       { orderNumber: order.orderNumber, id: order.id },
       { status: 201 }

@@ -16,6 +16,7 @@ import {
   CheckCircle,
   Eye,
   EyeOff,
+  Zap,
 } from "lucide-react";
 
 const navLinks = [
@@ -24,6 +25,7 @@ const navLinks = [
   { href: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
   { href: "/admin/promo", label: "أكواد الخصم", icon: Ticket },
   { href: "/admin/success-page", label: "صفحة الشكر", icon: CheckCircle },
+  { href: "/admin/integrations", label: "ربط المنصات", icon: Zap },
   { href: "/admin/settings", label: "الإعدادات", icon: Settings },
 ];
 
@@ -243,6 +245,7 @@ export default function AdminLayout({
     "/admin/orders": "from-amber-500 to-orange-500",
     "/admin/promo": "from-pink-500 to-rose-500",
     "/admin/success-page": "from-emerald-500 to-teal-500",
+    "/admin/integrations": "from-amber-500 to-orange-500",
     "/admin/settings": "from-slate-500 to-gray-600",
   };
 

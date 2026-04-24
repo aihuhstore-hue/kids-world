@@ -1,0 +1,190 @@
+"use client";
+
+import { useState, useEffect } from "react";
+import { Save, Loader2, Eye, EyeOff, CheckCircle, Zap } from "lucide-react";
+import toast from "react-hot-toast";
+
+interface IntegrationField {
+  key: string;
+  label: string;
+  placeholder: string;
+  secret?: boolean;
+  hint?: string;
+}
+
+const INTEGRATIONS = [
+  {
+    id: "facebook",
+    title: "Facebook / Meta",
+    emoji: "📘",
+    color: "from-blue-600 to-blue-700",
+    glow: "rgba(37,99,235,0.25)",
+    fields: [
+      { key: "fb_pixel_id", label: "Pixel ID", placeholder: "123456789012345", hint: "من Meta Events Manager" },
+      { key: "fb_access_token", label: "Conversions API Token", placeholder: "EAAxxxxxxxxx...", secret: true, hint: "من Meta Business → Conversions API" },
+    ] as IntegrationField[],
+  },
+  {
+    id: "tiktok",
+    title: "TikTok Ads",
+    emoji: "🎵",
+    color: "from-slate-800 to-slate-900",
+    glow: "rgba(0,0,0,0.3)",
+    fields: [
+      { key: "tiktok_pixel_id", label: "Pixel ID", placeholder: "CXXXXXXXXXXXXXXX", hint: "من TikTok Ads Manager → Assets → Events" },
+    ] as IntegrationField[],
+  },
+  {
+    id: "snapchat",
+    title: "Snapchat Ads",
+    emoji: "👻",
+    color: "from-yellow-400 to-yellow-500",
+    glow: "rgba(234,179,8,0.3)",
+    fields: [
+      { key: "snap_pixel_id", label: "Pixel ID", placeholder: "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx", hint: "من Snapchat Ads Manager → Pixels" },
+    ] as IntegrationField[],
+  },
+  {
+    id: "google",
+    title: "Google Analytics",
+    emoji: "📊",
+    color: "from-red-500 to-orange-500",
+    glow: "rgba(239,68,68,0.25)",
+    fields: [
+      { key: "ga_id", label: "Measurement ID", placeholder: "G-XXXXXXXXXX", hint: "من Google Analytics → Admin → Data Streams" },
+    ] as IntegrationField[],
+  },
+];
+
+export default function IntegrationsPage() {
+  const [values, setValues] = useState<Record<string, string>>({});
+  const [shown, setShown] = useState<Record<string, boolean>>({});
+  const [saving, setSaving] = useState<string | null>(null);
+  const [saved, setSaved] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    fetch("/api/settings").then((r) => r.json()).then((data) => {
+      const vals: Record<string, string> = {};
+      INTEGRATIONS.forEach((g) => g.fields.forEach((f) => { vals[f.key] = data[f.key] ?? ""; }));
+      setValues(vals);
+    });
+  }, []);
+
+  const handleSave = async (integrationId: string) => {
+    const integration = INTEGRATIONS.find((g) => g.id === integrationId)!;
+    const payload: Record<string, string> = {};
+    integration.fields.forEach((f) => { payload[f.key] = values[f.key] ?? ""; });
+
+    setSaving(integrationId);
+    try {
+      const password = sessionStorage.getItem("admin-password") ?? "";
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        toast.success(`تم حفظ إعدادات ${integration.title} ✅`);
+        setSaved((p) => ({ ...p, [integrationId]: true }));
+        setTimeout(() => setSaved((p) => ({ ...p, [integrationId]: false })), 3000);
+      } else {
+        toast.error("حدث خطأ أثناء الحفظ");
+      }
+    } catch {
+      toast.error("خطأ في الاتصال");
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  return (
+    <div className="max-w-2xl space-y-5">
+
+      {/* Header */}
+      <div className="rounded-3xl p-5 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg,#1a1a3e 0%,#16213e 60%,#0f3460 100%)", boxShadow: "0 8px 32px rgba(0,0,0,0.15)" }}>
+        <div className="flex items-center gap-3">
+          <div className="w-11 h-11 rounded-2xl flex items-center justify-center"
+            style={{ background: "linear-gradient(135deg,#f59e0b,#f97316)", boxShadow: "0 4px 16px rgba(245,158,11,0.4)" }}>
+            <Zap className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="text-lg font-black text-white">ربط المنصات الإعلانية</h2>
+            <p className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>
+              أدخل الكود مرة واحدة — يُطبَّق تلقائياً على كامل الموقع
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* البطاقات */}
+      {INTEGRATIONS.map((integration) => (
+        <div key={integration.id} className="rounded-3xl bg-white overflow-hidden"
+          style={{ border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+
+          {/* رأس البطاقة */}
+          <div className={`px-5 py-4 bg-gradient-to-r ${integration.color} flex items-center gap-3`}>
+            <span className="text-2xl">{integration.emoji}</span>
+            <h3 className="font-black text-white text-base">{integration.title}</h3>
+            {values[integration.fields[0].key] && (
+              <span className="mr-auto text-xs px-2.5 py-1 rounded-full font-bold"
+                style={{ background: "rgba(255,255,255,0.2)", color: "#fff" }}>
+                ✓ مُفعَّل
+              </span>
+            )}
+          </div>
+
+          {/* الحقول */}
+          <div className="p-5 space-y-4">
+            {integration.fields.map((field) => (
+              <div key={field.key}>
+                <label className="block text-sm font-bold text-gray-700 mb-1">
+                  {field.label}
+                </label>
+                {field.hint && (
+                  <p className="text-xs text-gray-400 mb-1.5">{field.hint}</p>
+                )}
+                <div className="relative">
+                  <input
+                    type={field.secret && !shown[field.key] ? "password" : "text"}
+                    value={values[field.key] ?? ""}
+                    onChange={(e) => setValues((p) => ({ ...p, [field.key]: e.target.value }))}
+                    placeholder={field.placeholder}
+                    dir="ltr"
+                    className="input-field text-sm font-mono"
+                    style={{ paddingLeft: field.secret ? "2.5rem" : undefined }}
+                  />
+                  {field.secret && (
+                    <button type="button"
+                      onClick={() => setShown((p) => ({ ...p, [field.key]: !p[field.key] }))}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors">
+                      {shown[field.key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            <button
+              onClick={() => handleSave(integration.id)}
+              disabled={saving === integration.id}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white transition-all duration-200 disabled:opacity-60 bg-gradient-to-r ${integration.color}`}
+              style={{ boxShadow: `0 4px 16px ${integration.glow}` }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = `0 8px 24px ${integration.glow}`; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = `0 4px 16px ${integration.glow}`; }}
+            >
+              {saving === integration.id ? (
+                <Loader2 className="w-4 h-4 animate-spin" />
+              ) : saved[integration.id] ? (
+                <CheckCircle className="w-4 h-4" />
+              ) : (
+                <Save className="w-4 h-4" />
+              )}
+              {saving === integration.id ? "جاري الحفظ..." : saved[integration.id] ? "تم الحفظ!" : "حفظ"}
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
