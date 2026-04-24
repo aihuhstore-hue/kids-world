@@ -26,32 +26,20 @@ export default function Header() {
           <div className="flex items-center justify-between h-16">
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 group select-none">
-              {/* Icon badge */}
-              <div className="relative w-10 h-10 flex-shrink-0">
-                <div className="w-10 h-10 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform duration-200"
-                  style={{ background: "linear-gradient(135deg,#f59e0b 0%,#f97316 50%,#ec4899 100%)", boxShadow: "0 4px 14px rgba(249,115,22,0.4)" }}>
-                  <span className="text-lg leading-none select-none">🌟</span>
-                </div>
-                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-purple-500 flex items-center justify-center text-[9px] leading-none"
-                  style={{ boxShadow: "0 2px 6px rgba(168,85,247,0.5)" }}>
-                  ✨
-                </span>
-              </div>
-
-              {/* Text */}
-              <div className="flex flex-col leading-tight">
-                <div className="flex items-baseline gap-0.5">
+{/* Text */}
+              <div className="flex flex-col leading-tight" dir="ltr">
+                <div className="flex items-baseline gap-1">
                   <span className="font-black text-[17px] tracking-tight"
-                    style={{ background: "linear-gradient(90deg,#7c3aed,#ec4899,#f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+                    style={{ background: "linear-gradient(90deg,#7c3aed,#ec4899)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     kids
                   </span>
-                  <span className="font-black text-[17px] tracking-tight text-gray-800 mx-0.5">world</span>
-                  <span className="font-black text-[17px] tracking-tight"
+                  <span className="font-black text-[17px] tracking-tight text-gray-800">world</span>
+                  <span className="font-black text-[19px] tracking-tight italic"
                     style={{ background: "linear-gradient(90deg,#f97316,#f59e0b)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                     j
                   </span>
                 </div>
-                <span className="text-[10px] font-medium text-gray-400 tracking-wide">كتب وألعاب تعليمية</span>
+                <span className="text-[10px] font-medium text-gray-400 tracking-wide text-right">كتب وألعاب تعليمية</span>
               </div>
             </Link>
 
