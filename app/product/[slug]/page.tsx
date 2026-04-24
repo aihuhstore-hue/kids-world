@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import OrderForm from "@/components/product/OrderForm";
+import ImageGallery from "@/components/product/ImageGallery";
 import { prisma } from "@/lib/prisma";
 import { parseProduct, formatPrice, getAgeGroupLabel } from "@/lib/utils";
 import { PRODUCT_TYPE_LABELS } from "@/types";
-import { CheckCircle, Tag, Users, Package, Star, AlertTriangle } from "lucide-react";
+import { CheckCircle, Tag, Users, Package, Star } from "lucide-react";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -61,47 +61,13 @@ export default async function ProductPage({ params }: Props) {
             {/* Left: Product Info */}
             <div className="space-y-6">
               {/* Images */}
-              <div className="relative">
-                <div className="relative aspect-square rounded-3xl overflow-hidden bg-white shadow-md">
-                  <Image
-                    src={product.images[0] ?? "https://picsum.photos/600/600"}
-                    alt={product.name}
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                  {discount && (
-                    <div className="absolute top-4 right-4 bg-red-500 text-white font-black text-lg px-3 py-1 rounded-2xl shadow">
-                      -{discount}%
-                    </div>
-                  )}
-                  {product.showStock && product.stock <= 5 && product.stock > 0 && (
-                    <div className="absolute bottom-4 left-4 bg-orange-400 text-white text-sm font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 shadow">
-                      <AlertTriangle className="w-4 h-4" />
-                      بقيت {product.stock} قطع فقط!
-                    </div>
-                  )}
-                </div>
-
-                {/* Thumbnail strip */}
-                {product.images.length > 1 && (
-                  <div className="flex gap-2 mt-3">
-                    {product.images.slice(0, 4).map((img, i) => (
-                      <div
-                        key={i}
-                        className="relative w-16 h-16 rounded-xl overflow-hidden bg-white shadow-sm border-2 border-transparent hover:border-primary-300 cursor-pointer transition-colors"
-                      >
-                        <Image
-                          src={img}
-                          alt={`صورة ${i + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              <ImageGallery
+                images={product.images}
+                productName={product.name}
+                discount={discount}
+                showStock={product.showStock}
+                stock={product.stock}
+              />
 
               {/* Product Details */}
               <div className="bg-white rounded-3xl p-6 shadow-sm">

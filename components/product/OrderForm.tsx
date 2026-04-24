@@ -147,11 +147,16 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
         }),
       });
 
-      if (!res.ok) throw new Error("فشل إرسال الطلب");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        alert(errData.error ?? "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.");
+        return;
+      }
       const order = await res.json();
       router.push(`/order-success?orderNumber=${order.orderNumber}`);
-    } catch {
-      alert("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.");
+    } catch (e) {
+      console.error("Order submit error:", e);
+      alert("تعذّر الاتصال بالخادم. تأكد من اتصالك بالإنترنت وحاول مرة أخرى.");
     } finally {
       setLoading(false);
     }

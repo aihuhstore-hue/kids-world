@@ -15,6 +15,7 @@ export default function SuccessPageSettings() {
     success_title: "",
     success_message: "",
     success_image: "",
+    success_show_steps: "true",
     success_step1: "",
     success_step2: "",
     success_step3: "",
