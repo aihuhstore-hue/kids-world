@@ -213,7 +213,7 @@ export default function AdminLayout({
                     </svg>
                     جاري التحقق...
                   </span>
-                ) : "🚀 دخول"}
+                ) : "تسجيل الدخول"}
               </button>
             </form>
 
