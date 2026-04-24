@@ -191,9 +191,32 @@ export default function SuccessPageSettings() {
           </div>
         </div>
 
+        {/* إظهار/إخفاء الخطوات */}
+        <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+          <div>
+            <p className="font-semibold text-gray-700 text-sm">الخطوات الثلاث</p>
+            <p className="text-xs text-gray-400 mt-0.5">
+              {form.success_show_steps === "true" ? "تظهر للزبون في صفحة الشكر" : "مخفية من صفحة الشكر"}
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => update("success_show_steps", form.success_show_steps === "true" ? "false" : "true")}
+            className={`relative w-12 h-6 rounded-full transition-colors flex-shrink-0 ${
+              form.success_show_steps === "true" ? "bg-green-500" : "bg-gray-300"
+            }`}
+          >
+            <div
+              className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
+                form.success_show_steps === "true" ? "right-1" : "left-1"
+              }`}
+            />
+          </button>
+        </div>
+
         {/* الخطوات */}
         <div className="space-y-3">
-          <label className="block text-sm font-semibold text-gray-700">الخطوات</label>
+          <label className="block text-sm font-semibold text-gray-700">نص الخطوات</label>
           {([
             { key: "success_step1" as const, label: "خطوة 1: التأكيد", color: "bg-blue-50" },
             { key: "success_step2" as const, label: "خطوة 2: الشحن", color: "bg-yellow-50" },

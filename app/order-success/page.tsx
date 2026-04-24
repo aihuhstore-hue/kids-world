@@ -13,7 +13,7 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
   const { orderNumber = "ORD-XXXXX" } = await searchParams;
 
   const settings = await prisma.setting.findMany({
-    where: { key: { in: ["success_title", "success_message", "success_image", "success_step1", "success_step2", "success_step3"] } }
+    where: { key: { in: ["success_title", "success_message", "success_image", "success_show_steps", "success_step1", "success_step2", "success_step3"] } }
   });
   const s: Record<string, string> = {};
   for (const row of settings) s[row.key] = row.value;
@@ -21,6 +21,7 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
   const title = s.success_title || "تم تأكيد طلبك! 🎉";
   const message = s.success_message || "شكراً لك! سيتصل بك فريقنا خلال 24 ساعة لتأكيد الطلب";
   const image = s.success_image || "";
+  const showSteps = s.success_show_steps !== "false";
   const step1 = s.success_step1 || "سيتصل بك مستشارنا لتأكيد الطلب";
   const step2 = s.success_step2 || "يتم تحضير وشحن طلبك خلال 24-48 ساعة";
   const step3 = s.success_step3 || "يصلك طلبك خلال 2-5 أيام عمل";
@@ -44,41 +45,37 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
             <h1 className="text-3xl font-black text-gray-900 mb-2">{title}</h1>
             <p className="text-gray-500 mb-6">{message}</p>
 
-            <div className="bg-gray-50 rounded-2xl p-4 mb-6">
-              <p className="text-sm text-gray-500 mb-1">رقم الطلب</p>
-              <p className="text-2xl font-black text-gray-900 tracking-wider">{orderNumber}</p>
-              <p className="text-xs text-gray-400 mt-1">احتفظ بهذا الرقم للمتابعة</p>
-            </div>
-
-            <div className="space-y-3 mb-8 text-right">
-              <div className="flex items-center gap-3 bg-blue-50 rounded-2xl p-3">
-                <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Phone className="w-4 h-4 text-blue-600" />
+            {showSteps && (
+              <div className="space-y-3 mb-8 text-right">
+                <div className="flex items-center gap-3 bg-blue-50 rounded-2xl p-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Phone className="w-4 h-4 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-800">خطوة 1: التأكيد</p>
+                    <p className="text-xs text-gray-500">{step1}</p>
+                  </div>
                 </div>
-                <div>
-                  <p className="font-bold text-sm text-gray-800">خطوة 1: التأكيد</p>
-                  <p className="text-xs text-gray-500">{step1}</p>
+                <div className="flex items-center gap-3 bg-yellow-50 rounded-2xl p-3">
+                  <div className="w-8 h-8 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Package className="w-4 h-4 text-yellow-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-800">خطوة 2: الشحن</p>
+                    <p className="text-xs text-gray-500">{step2}</p>
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-3 bg-yellow-50 rounded-2xl p-3">
-                <div className="w-8 h-8 bg-yellow-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Package className="w-4 h-4 text-yellow-600" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm text-gray-800">خطوة 2: الشحن</p>
-                  <p className="text-xs text-gray-500">{step2}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 bg-green-50 rounded-2xl p-3">
-                <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
-                  <Home className="w-4 h-4 text-green-600" />
-                </div>
-                <div>
-                  <p className="font-bold text-sm text-gray-800">خطوة 3: التوصيل</p>
-                  <p className="text-xs text-gray-500">{step3}</p>
+                <div className="flex items-center gap-3 bg-green-50 rounded-2xl p-3">
+                  <div className="w-8 h-8 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <Home className="w-4 h-4 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-sm text-gray-800">خطوة 3: التوصيل</p>
+                    <p className="text-xs text-gray-500">{step3}</p>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
             <div className="flex flex-col sm:flex-row gap-3">
               <Link href="/" className="flex-1 btn-outline text-center py-3">
