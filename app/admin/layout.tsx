@@ -133,9 +133,19 @@ export default function AdminLayout({
                   <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                 </div>
               </div>
-              <h1 className="text-2xl font-black text-white mb-1"
-                style={{ textShadow: "0 2px 8px rgba(0,0,0,0.5)" }}>
-                لوحة التحكم
+              <h1 className="text-3xl font-black mb-1 tracking-tight"
+                style={{
+                  background: "linear-gradient(90deg, #f59e0b, #a78bfa, #60a5fa)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  textShadow: "none",
+                  filter: "drop-shadow(0 2px 8px rgba(167,139,250,0.4))",
+                }}>
+                kids world <span style={{
+                  background: "linear-gradient(90deg, #34d399, #60a5fa)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}>j</span>
               </h1>
               <p className="text-sm font-medium"
                 style={{ color: "rgba(253,186,116,0.9)" }}>
