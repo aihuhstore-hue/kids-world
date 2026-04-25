@@ -14,6 +14,7 @@
   "dependencies": {
     "@hookform/resolvers": "^3.3.4",
     "@prisma/client": "^6.0.0",
+    "@types/web-push": "^3.6.4",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "framer-motion": "^11.0.8",
@@ -25,6 +26,7 @@
     "react-hot-toast": "^2.4.1",
     "sharp": "^0.33.2",
     "tailwind-merge": "^2.2.1",
+    "web-push": "^3.6.7",
     "zod": "^3.22.4",
     "zustand": "^4.5.2"
   },
