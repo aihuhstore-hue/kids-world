@@ -17,6 +17,8 @@ import {
   Eye,
   EyeOff,
   Zap,
+  Moon,
+  Sun,
 } from "lucide-react";
 
 const navLinks = [
@@ -41,11 +43,20 @@ export default function AdminLayout({
   const [loginLoading, setLoginLoading] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("admin-auth");
     if (stored === "true") setAuthenticated(true);
+    const dark = localStorage.getItem("admin-dark") === "true";
+    setIsDark(dark);
   }, []);
+
+  const toggleDark = () => {
+    const next = !isDark;
+    setIsDark(next);
+    localStorage.setItem("admin-dark", String(next));
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -343,18 +354,24 @@ export default function AdminLayout({
       )}
 
       {/* المحتوى */}
-      <div className="flex-1 md:mr-64 flex flex-col min-h-screen" style={{ background: "#f1f3f9" }}>
+      <div
+        className={`flex-1 md:mr-64 flex flex-col min-h-screen transition-colors duration-300 ${isDark ? "admin-dark" : ""}`}
+        style={{ background: isDark ? "#0d0f18" : "#f1f3f9" }}
+      >
 
         {/* Header */}
-        <header className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3"
-          style={{ background: "rgba(255,255,255,0.9)", backdropFilter: "blur(12px)", borderBottom: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 1px 12px rgba(0,0,0,0.06)" }}>
+        <header className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3 transition-all duration-300"
+          style={{
+            background: isDark ? "rgba(13,15,24,0.95)" : "rgba(255,255,255,0.9)",
+            backdropFilter: "blur(12px)",
+            borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+            boxShadow: isDark ? "0 1px 12px rgba(0,0,0,0.4)" : "0 1px 12px rgba(0,0,0,0.06)",
+          }}>
           <button onClick={() => setSidebarOpen(!sidebarOpen)}
             className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
-            style={{ background: "rgba(0,0,0,0.05)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.1)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; }}
+            style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)" }}
           >
-            {sidebarOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+            {sidebarOpen ? <X className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : undefined }} /> : <Menu className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : undefined }} />}
           </button>
 
           <div className="flex items-center gap-2">
@@ -367,17 +384,37 @@ export default function AdminLayout({
                 </div>
               ) : null;
             })()}
-            <h1 className="font-black text-gray-800 text-base">{activeLabel}</h1>
+            <h1 className="font-black text-base" style={{ color: isDark ? "#f1f5f9" : "#1f2937" }}>{activeLabel}</h1>
           </div>
 
-          <Link href="/" className="mr-auto flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200"
-            style={{ color: "rgba(0,0,0,0.4)", background: "rgba(0,0,0,0.04)" }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.08)"; e.currentTarget.style.color = "rgba(0,0,0,0.7)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.04)"; e.currentTarget.style.color = "rgba(0,0,0,0.4)"; }}
-          >
-            عرض الموقع
-            <span style={{ fontSize: "10px" }}>←</span>
-          </Link>
+          <div className="mr-auto flex items-center gap-2">
+            {/* زر الوضع الليلي */}
+            <button
+              onClick={toggleDark}
+              title={isDark ? "الوضع النهاري" : "الوضع الليلي"}
+              className="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
+              style={{
+                background: isDark ? "rgba(251,191,36,0.15)" : "rgba(0,0,0,0.04)",
+                border: isDark ? "1px solid rgba(251,191,36,0.25)" : "1px solid transparent",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+            >
+              {isDark
+                ? <Sun className="w-4 h-4 text-yellow-400" />
+                : <Moon className="w-4 h-4 text-gray-500" />
+              }
+            </button>
+
+            <Link href="/" className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200"
+              style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)", background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"; e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"; e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"; }}
+            >
+              عرض الموقع
+              <span style={{ fontSize: "10px" }}>←</span>
+            </Link>
+          </div>
         </header>
 
         <div className="p-4 md:p-6">{children}</div>

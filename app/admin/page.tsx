@@ -7,7 +7,18 @@ import {
   ArrowLeft, Sparkles, Calendar, ChevronLeft, ChevronRight,
   Clock, CheckCircle, XCircle, Truck, AlertCircle,
 } from "lucide-react";
-import { formatPrice } from "@/lib/utils";
+import { formatPrice, getStatusLabel } from "@/lib/utils";
+
+interface RecentOrder {
+  id: string;
+  orderNumber: string;
+  firstName: string;
+  lastName: string;
+  wilayaName: string;
+  total: number;
+  status: string;
+  createdAt: string;
+}
 
 interface Stats {
   totalOrders: number;
@@ -25,6 +36,7 @@ interface Stats {
   weekRevenue: number;
   monthRevenue: number;
   lastMonthRevenue: number;
+  recentOrders?: RecentOrder[];
 }
 
 const MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
@@ -244,6 +256,66 @@ export default function AdminDashboard() {
           ))}
         </div>
       </div>
+
+      {/* آخر الطلبيات */}
+      {stats?.recentOrders && stats.recentOrders.length > 0 && (
+        <div className="rounded-3xl p-5 bg-white"
+          style={{ border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-black text-gray-800 flex items-center gap-2">
+              <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-gradient-to-br from-rose-500 to-pink-600">
+                <ShoppingBag className="w-3.5 h-3.5 text-white" />
+              </div>
+              آخر الطلبيات
+            </h3>
+            <Link href="/admin/orders"
+              className="text-xs font-bold px-3 py-1.5 rounded-xl transition-all"
+              style={{ background: "rgba(0,0,0,0.04)", color: "#6b7280" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.08)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.04)"; }}>
+              عرض الكل
+            </Link>
+          </div>
+          <div className="space-y-2">
+            {stats.recentOrders.map((order) => {
+              const statusColors: Record<string, { bg: string; color: string }> = {
+                NEW: { bg: "rgba(129,140,248,0.12)", color: "#818cf8" },
+                PREPARING: { bg: "rgba(251,191,36,0.12)", color: "#f59e0b" },
+                SHIPPED: { bg: "rgba(167,139,250,0.12)", color: "#a78bfa" },
+                DELIVERED: { bg: "rgba(52,211,153,0.12)", color: "#34d399" },
+                CANCELLED: { bg: "rgba(248,113,113,0.12)", color: "#f87171" },
+              };
+              const sc = statusColors[order.status] ?? { bg: "rgba(0,0,0,0.05)", color: "#6b7280" };
+              return (
+                <Link key={order.id} href="/admin/orders"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all duration-200 group"
+                  style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.04)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; e.currentTarget.style.transform = "translateX(-2px)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.02)"; e.currentTarget.style.transform = "translateX(0)"; }}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono text-xs font-black text-gray-600">#{order.orderNumber}</span>
+                      <span className="text-sm font-semibold text-gray-800 truncate">{order.firstName} {order.lastName}</span>
+                      <span className="text-xs text-gray-400">{order.wilayaName}</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-0.5">
+                      {new Date(order.createdAt).toLocaleString("ar-DZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                    </p>
+                  </div>
+                  <span className="text-sm font-black flex-shrink-0" style={{ color: sc.color }}>
+                    {formatPrice(order.total)}
+                  </span>
+                  <span className="text-xs px-2 py-1 rounded-xl font-bold flex-shrink-0"
+                    style={{ background: sc.bg, color: sc.color }}>
+                    {getStatusLabel(order.status)}
+                  </span>
+                  <ArrowLeft className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400" />
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

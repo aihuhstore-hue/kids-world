@@ -67,6 +67,21 @@ const INTEGRATIONS = [
       { key: "whatsapp_number", label: "رقم WhatsApp", placeholder: "213555123456", hint: "الرقم بدون + مثلاً 213555123456 — يظهر في أسفل الموقع" },
     ] as IntegrationField[],
   },
+  {
+    id: "sheets",
+    title: "Google Sheets",
+    emoji: "📊",
+    color: "from-green-600 to-emerald-700",
+    glow: "rgba(22,163,74,0.25)",
+    fields: [
+      {
+        key: "google_sheets_webhook",
+        label: "رابط Google Apps Script Webhook",
+        placeholder: "https://script.google.com/macros/s/AKfy.../exec",
+        hint: "كل طلبية جديدة تُضاف تلقائياً لجدول Google Sheets الخاص بك",
+      },
+    ] as IntegrationField[],
+  },
 ];
 
 export default function IntegrationsPage() {
@@ -233,6 +248,37 @@ export default function IntegrationsPage() {
               )}
               {saving === integration.id ? "جاري الحفظ..." : saved[integration.id] ? "تم الحفظ!" : "حفظ"}
             </button>
+
+            {/* تعليمات Google Sheets */}
+            {integration.id === "sheets" && (
+              <div className="mt-3 p-4 rounded-2xl bg-green-50 border border-green-100">
+                <p className="text-xs font-black text-green-800 mb-2">📋 خطوات الإعداد:</p>
+                <ol className="text-xs text-green-700 space-y-1 list-decimal list-inside">
+                  <li>افتح Google Sheets وأنشئ جدول جديد</li>
+                  <li>اذهب إلى: <strong>Extensions → Apps Script</strong></li>
+                  <li>احذف الكود الموجود والصق الكود أدناه</li>
+                  <li>اضغط <strong>Deploy → New Deployment → Web App</strong></li>
+                  <li>اختر: <strong>Anyone</strong> في Execute as وWho has access</li>
+                  <li>انسخ الرابط والصقه في الحقل أعلاه</li>
+                </ol>
+                <div className="mt-3 bg-gray-900 rounded-xl p-3 overflow-x-auto">
+                  <pre className="text-xs text-green-300 font-mono whitespace-pre-wrap">{`function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSheet();
+  var d = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    d.orderNumber, d.firstName+' '+d.lastName,
+    d.phone, d.wilayaName, d.commune,
+    d.deliveryType==='home'?'منزل':'مكتب بريد',
+    d.total+' دج', d.status,
+    new Date(d.createdAt).toLocaleString('ar-DZ')
+  ]);
+  return ContentService
+    .createTextOutput(JSON.stringify({ok:true}))
+    .setMimeType(ContentService.MimeType.JSON);
+}`}</pre>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       ))}

@@ -133,6 +133,37 @@ export async function POST(req: NextRequest) {
       }
     } catch { /* لا نوقف الطلب إذا فشل الإرسال */ }
 
+    // Google Sheets Webhook
+    try {
+      const sheetsSetting = await prisma.setting.findUnique({
+        where: { key: "google_sheets_webhook" },
+      });
+      const webhookUrl = sheetsSetting?.value?.trim();
+      if (webhookUrl) {
+        await fetch(webhookUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderNumber: order.orderNumber,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            phone: data.phone,
+            wilayaName: data.wilayaName,
+            commune: data.commune,
+            deliveryType: data.deliveryType,
+            address: data.address,
+            total: data.total,
+            subtotal: data.subtotal,
+            deliveryFee: data.deliveryFee,
+            discount: data.discount ?? 0,
+            promoCode: data.promoCode ?? "",
+            status: "NEW",
+            createdAt: new Date().toISOString(),
+          }),
+        }).catch(() => {});
+      }
+    } catch { /* لا نوقف الطلب إذا فشل الإرسال لـ Sheets */ }
+
     return NextResponse.json(
       { orderNumber: order.orderNumber, id: order.id },
       { status: 201 }

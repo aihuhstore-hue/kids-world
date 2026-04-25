@@ -88,3 +88,67 @@ body {
   padding-right: 16px;
   padding-left: 40px;
 }
+
+/* ============================================
+   Admin Dark Mode
+   ============================================ */
+.admin-dark {
+  color-scheme: dark;
+}
+
+/* خلفيات */
+.admin-dark .bg-white {
+  background-color: #1e2035 !important;
+}
+.admin-dark .bg-gray-50 {
+  background-color: #151722 !important;
+}
+.admin-dark .bg-gray-100 {
+  background-color: #1a1c2e !important;
+}
+
+/* ألوان النصوص */
+.admin-dark .text-gray-900 { color: #f1f5f9 !important; }
+.admin-dark .text-gray-800 { color: #e2e8f0 !important; }
+.admin-dark .text-gray-700 { color: #cbd5e1 !important; }
+.admin-dark .text-gray-600 { color: #94a3b8 !important; }
+.admin-dark .text-gray-500 { color: #64748b !important; }
+.admin-dark .text-gray-400 { color: #475569 !important; }
+
+/* الحدود */
+.admin-dark .border-gray-100 { border-color: rgba(255,255,255,0.06) !important; }
+.admin-dark .border-gray-200 { border-color: rgba(255,255,255,0.1) !important; }
+
+/* حقول الإدخال */
+.admin-dark .input-field {
+  background-color: #151722 !important;
+  border-color: rgba(255,255,255,0.15) !important;
+  color: #e2e8f0 !important;
+}
+.admin-dark .input-field::placeholder { color: #475569 !important; }
+
+.admin-dark select {
+  background-color: #151722 !important;
+  color: #e2e8f0 !important;
+  border-color: rgba(255,255,255,0.15) !important;
+}
+
+.admin-dark input:not([type="radio"]):not([type="checkbox"]):not([type="range"]) {
+  background-color: #151722 !important;
+  color: #e2e8f0 !important;
+}
+.admin-dark input::placeholder { color: #475569 !important; }
+
+.admin-dark textarea {
+  background-color: #151722 !important;
+  color: #e2e8f0 !important;
+}
+.admin-dark textarea::placeholder { color: #475569 !important; }
+
+/* بطاقات hover */
+.admin-dark .hover\:bg-gray-50:hover { background-color: #1a1c2e !important; }
+.admin-dark .hover\:bg-gray-100:hover { background-color: #1e2035 !important; }
+
+/* شريط التمرير في الوضع الليلي */
+.admin-dark::-webkit-scrollbar-track { background: #0d0f18; }
+.admin-dark::-webkit-scrollbar-thumb { background: #334155; }

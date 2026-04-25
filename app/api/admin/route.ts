@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
     weekRevenue,
     monthRevenue,
     lastMonthRevenue,
+    recentOrders,
   ] = await Promise.all([
     prisma.order.count(),
     prisma.order.count({ where: { status: "NEW" } }),
@@ -51,21 +52,37 @@ export async function GET(req: NextRequest) {
     prisma.order.count({ where: { createdAt: { gte: startOfYesterday, lt: startOfToday } } }),
     prisma.order.count({ where: { createdAt: { gte: startOfWeek } } }),
     prisma.order.count({ where: { createdAt: { gte: startOfMonth } } }),
+    // الإيرادات تشمل كل الطلبات ما عدا الملغاة
     prisma.order.aggregate({
-      where: { status: { in: ["DELIVERED", "SHIPPED"] } },
+      where: { status: { not: "CANCELLED" } },
       _sum: { total: true },
     }),
     prisma.order.aggregate({
-      where: { status: { in: ["DELIVERED", "SHIPPED"] }, createdAt: { gte: startOfWeek } },
+      where: { status: { not: "CANCELLED" }, createdAt: { gte: startOfWeek } },
       _sum: { total: true },
     }),
     prisma.order.aggregate({
-      where: { status: { in: ["DELIVERED", "SHIPPED"] }, createdAt: { gte: startOfMonth } },
+      where: { status: { not: "CANCELLED" }, createdAt: { gte: startOfMonth } },
       _sum: { total: true },
     }),
     prisma.order.aggregate({
-      where: { status: { in: ["DELIVERED", "SHIPPED"] }, createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
+      where: { status: { not: "CANCELLED" }, createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
       _sum: { total: true },
+    }),
+    // آخر 6 طلبيات
+    prisma.order.findMany({
+      take: 6,
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        orderNumber: true,
+        firstName: true,
+        lastName: true,
+        wilayaName: true,
+        total: true,
+        status: true,
+        createdAt: true,
+      },
     }),
   ]);
 
@@ -85,6 +102,7 @@ export async function GET(req: NextRequest) {
     weekRevenue: weekRevenue._sum.total ?? 0,
     monthRevenue: monthRevenue._sum.total ?? 0,
     lastMonthRevenue: lastMonthRevenue._sum.total ?? 0,
+    recentOrders,
   });
 }
 
