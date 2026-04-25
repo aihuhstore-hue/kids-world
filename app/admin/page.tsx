@@ -33,8 +33,11 @@ interface Stats {
   weekOrders: number;
   monthOrders: number;
   revenue: number;
+  revenueNoDelivery: number;
   weekRevenue: number;
+  weekRevenueNoDelivery: number;
   monthRevenue: number;
+  monthRevenueNoDelivery: number;
   lastMonthRevenue: number;
   recentOrders?: RecentOrder[];
 }
@@ -100,9 +103,9 @@ export default function AdminDashboard() {
       {/* الإيرادات الرئيسية */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
-          { label: "إيرادات الشهر", value: formatPrice(stats?.monthRevenue ?? 0), sub: growthVsLastMonth >= 0 ? `↑ ${growthVsLastMonth}% عن الشهر الماضي` : `↓ ${Math.abs(growthVsLastMonth)}% عن الشهر الماضي`, subColor: growthVsLastMonth >= 0 ? "#34d399" : "#f87171", gradient: "from-emerald-500 to-teal-500", glow: "rgba(16,185,129,0.3)" },
-          { label: "إيرادات الأسبوع", value: formatPrice(stats?.weekRevenue ?? 0), sub: `من ${stats?.weekOrders ?? 0} طلب`, subColor: "#60a5fa", gradient: "from-blue-500 to-cyan-500", glow: "rgba(59,130,246,0.3)" },
-          { label: "الإيرادات الكلية", value: formatPrice(stats?.revenue ?? 0), sub: `${stats?.deliveredOrders ?? 0} طلب مُسلَّم`, subColor: "#a78bfa", gradient: "from-violet-500 to-purple-600", glow: "rgba(124,58,237,0.3)" },
+          { label: "إيرادات الشهر", withDelivery: stats?.monthRevenue ?? 0, noDelivery: stats?.monthRevenueNoDelivery ?? 0, sub: growthVsLastMonth >= 0 ? `↑ ${growthVsLastMonth}% عن الشهر الماضي` : `↓ ${Math.abs(growthVsLastMonth)}% عن الشهر الماضي`, subColor: growthVsLastMonth >= 0 ? "#34d399" : "#f87171", gradient: "from-emerald-500 to-teal-500", glow: "rgba(16,185,129,0.3)" },
+          { label: "إيرادات الأسبوع", withDelivery: stats?.weekRevenue ?? 0, noDelivery: stats?.weekRevenueNoDelivery ?? 0, sub: `من ${stats?.weekOrders ?? 0} طلب`, subColor: "#60a5fa", gradient: "from-blue-500 to-cyan-500", glow: "rgba(59,130,246,0.3)" },
+          { label: "الإيرادات الكلية", withDelivery: stats?.revenue ?? 0, noDelivery: stats?.revenueNoDelivery ?? 0, sub: `${stats?.deliveredOrders ?? 0} طلب مُسلَّم`, subColor: "#a78bfa", gradient: "from-violet-500 to-purple-600", glow: "rgba(124,58,237,0.3)" },
         ].map((c) => (
           <div key={c.label} className="rounded-3xl p-5 bg-white transition-all duration-300"
             style={{ border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
@@ -112,9 +115,14 @@ export default function AdminDashboard() {
               style={{ boxShadow: `0 4px 14px ${c.glow}` }}>
               <TrendingUp className="w-5 h-5 text-white" />
             </div>
-            <p className="text-xl font-black text-gray-900">{c.value}</p>
-            <p className="text-xs font-medium text-gray-400 mt-0.5">{c.label}</p>
-            <p className="text-xs font-bold mt-1" style={{ color: c.subColor }}>{c.sub}</p>
+            <p className="text-xl font-black text-gray-900">{formatPrice(c.withDelivery)}</p>
+            <p className="text-xs font-bold text-gray-400 mt-0.5">شامل التوصيل</p>
+            <div className="mt-1.5 pt-1.5" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+              <p className="text-sm font-black" style={{ color: c.gradient.includes("emerald") ? "#10b981" : c.gradient.includes("blue") ? "#3b82f6" : "#8b5cf6" }}>{formatPrice(c.noDelivery)}</p>
+              <p className="text-xs text-gray-400">بدون توصيل</p>
+            </div>
+            <p className="text-xs font-medium text-gray-400 mt-1.5">{c.label}</p>
+            <p className="text-xs font-bold mt-0.5" style={{ color: c.subColor }}>{c.sub}</p>
           </div>
         ))}
       </div>

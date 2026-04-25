@@ -55,19 +55,19 @@ export async function GET(req: NextRequest) {
     // الإيرادات تشمل كل الطلبات ما عدا الملغاة
     prisma.order.aggregate({
       where: { status: { not: "CANCELLED" } },
-      _sum: { total: true },
+      _sum: { total: true, deliveryFee: true },
     }),
     prisma.order.aggregate({
       where: { status: { not: "CANCELLED" }, createdAt: { gte: startOfWeek } },
-      _sum: { total: true },
+      _sum: { total: true, deliveryFee: true },
     }),
     prisma.order.aggregate({
       where: { status: { not: "CANCELLED" }, createdAt: { gte: startOfMonth } },
-      _sum: { total: true },
+      _sum: { total: true, deliveryFee: true },
     }),
     prisma.order.aggregate({
       where: { status: { not: "CANCELLED" }, createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
-      _sum: { total: true },
+      _sum: { total: true, deliveryFee: true },
     }),
     // آخر 6 طلبيات
     prisma.order.findMany({
@@ -99,8 +99,11 @@ export async function GET(req: NextRequest) {
     weekOrders,
     monthOrders,
     revenue: revenue._sum.total ?? 0,
+    revenueNoDelivery: (revenue._sum.total ?? 0) - (revenue._sum.deliveryFee ?? 0),
     weekRevenue: weekRevenue._sum.total ?? 0,
+    weekRevenueNoDelivery: (weekRevenue._sum.total ?? 0) - (weekRevenue._sum.deliveryFee ?? 0),
     monthRevenue: monthRevenue._sum.total ?? 0,
+    monthRevenueNoDelivery: (monthRevenue._sum.total ?? 0) - (monthRevenue._sum.deliveryFee ?? 0),
     lastMonthRevenue: lastMonthRevenue._sum.total ?? 0,
     recentOrders,
   });
