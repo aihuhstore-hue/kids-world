@@ -4,7 +4,6 @@ self.addEventListener('push', function(event) {
   event.waitUntil(
     self.registration.showNotification(data.title || '🛒 طلبية جديدة', {
       body: data.body || '',
-      icon: '/favicon.ico',
       dir: 'rtl',
       lang: 'ar',
       tag: 'new-order',
