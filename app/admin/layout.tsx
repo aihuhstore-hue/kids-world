@@ -348,7 +348,7 @@ export default function AdminLayout({
         style={{
           background: "linear-gradient(180deg, #13151f 0%, #0d0f18 100%)",
           borderLeft: "1px solid rgba(255,255,255,0.06)",
-          boxShadow: "-8px 0 32px rgba(0,0,0,0.4)",
+          boxShadow: sidebarOpen ? "-8px 0 32px rgba(0,0,0,0.4)" : "none",
         }}>
 
         {/* لوغو */}
@@ -445,13 +445,6 @@ export default function AdminLayout({
             borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
             boxShadow: isDark ? "0 1px 12px rgba(0,0,0,0.4)" : "0 1px 12px rgba(0,0,0,0.06)",
           }}>
-          <button onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
-            style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)" }}
-          >
-            {sidebarOpen ? <X className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} /> : <Menu className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} />}
-          </button>
-
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {(() => {
               const active = navLinks.find((l) => l.href === pathname || (l.href !== "/admin" && pathname.startsWith(l.href)));
@@ -466,6 +459,13 @@ export default function AdminLayout({
           </div>
 
           <div className="mr-auto flex-shrink-0 flex items-center gap-2">
+            {/* زر القائمة — على اليسار بعيداً عن السايدبار */}
+            <button onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
+              style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}
+            >
+              {sidebarOpen ? <X className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} /> : <Menu className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} />}
+            </button>
             {/* زر الإشعارات */}
             {pushStatus !== "unsupported" && (
               pushStatus === "granted" ? (
