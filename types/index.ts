@@ -180,8 +180,16 @@ export const orderFormSchema = z.object({
   deliveryType: z.enum(["home", "office"], {
     required_error: "يرجى اختيار نوع التوصيل",
   }),
-  address: z.string().min(5, "يرجى إدخال العنوان التفصيلي"),
+  address: z.string().optional().default(""),
   notes: z.string().optional(),
+}).superRefine((data, ctx) => {
+  if (data.deliveryType === "home" && (!data.address || data.address.trim().length < 5)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "يرجى إدخال العنوان التفصيلي",
+      path: ["address"],
+    });
+  }
 });
 
 export type OrderFormData = z.infer<typeof orderFormSchema>;

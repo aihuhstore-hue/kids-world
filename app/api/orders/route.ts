@@ -13,7 +13,7 @@ const createOrderSchema = z.object({
   wilayaName: z.string().min(1),
   commune: z.string().optional().default(""),
   deliveryType: z.enum(["home", "office"]),
-  address: z.string().min(1),
+  address: z.string().optional().default(""),
   notes: z.string().optional(),
   items: z.array(
     z.object({

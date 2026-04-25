@@ -477,20 +477,22 @@ export default function CheckoutPage() {
                     </div>
                   )}
 
-                  {/* Address */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      العنوان التفصيلي <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      {...register("address")}
-                      placeholder="مثال: حي النصر، رقم 12، عمارة ب..."
-                      className={`input-field ${errors.address ? "input-error" : ""}`}
-                    />
-                    {errors.address && (
-                      <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
-                    )}
-                  </div>
+                  {/* Address - only for home delivery */}
+                  {watchedDeliveryType === "home" && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        العنوان التفصيلي <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        {...register("address")}
+                        placeholder="مثال: حي النصر، رقم 12، عمارة ب..."
+                        className={`input-field ${errors.address ? "input-error" : ""}`}
+                      />
+                      {errors.address && (
+                        <p className="text-red-500 text-xs mt-1">{errors.address.message}</p>
+                      )}
+                    </div>
+                  )}
 
                   {/* Notes */}
                   <div>
