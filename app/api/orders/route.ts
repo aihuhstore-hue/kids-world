@@ -226,7 +226,6 @@ export async function POST(req: NextRequest) {
           `📱 ${data.phone}`,
           `📍 ${data.wilayaName}${data.commune ? " — " + data.commune : ""}`,
           `${deliveryLabel}`,
-          `🏘️ العنوان: ${data.address}`,
           data.notes ? `📝 ملاحظة: ${data.notes}` : "",
           `━━━━━━━━━━━━━━━`,
           `🛍️ *المنتجات:*`,
