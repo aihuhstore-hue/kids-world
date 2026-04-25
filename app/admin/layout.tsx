@@ -19,7 +19,10 @@ import {
   Zap,
   Moon,
   Sun,
+  Bell,
+  BellOff,
 } from "lucide-react";
+import toast from "react-hot-toast";
 
 function urlBase64ToUint8Array(base64: string): ArrayBuffer {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
@@ -53,6 +56,7 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [pushStatus, setPushStatus] = useState<"unknown" | "granted" | "denied" | "unsupported">("unknown");
 
   useEffect(() => {
     const stored = sessionStorage.getItem("admin-auth");
@@ -61,35 +65,70 @@ export default function AdminLayout({
     setIsDark(dark);
   }, []);
 
-  // تسجيل Service Worker وطلب إذن الإشعارات
+  // تحقق من حالة الإشعارات عند فتح الصفحة
   useEffect(() => {
     if (!authenticated) return;
-    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window) || !("Notification" in window)) {
+      setPushStatus("unsupported");
+      return;
+    }
+    setPushStatus(Notification.permission === "granted" ? "granted" : Notification.permission === "denied" ? "denied" : "unknown");
 
-    (async () => {
-      try {
-        const reg = await navigator.serviceWorker.register("/sw.js");
-        const permission = await Notification.requestPermission();
-        if (permission !== "granted") return;
+    // إذا الإذن ممنوح مسبقاً، اشترك تلقائياً
+    if (Notification.permission === "granted") {
+      registerPush();
+    }
+  }, [authenticated]);
 
-        const vapidRes = await fetch("/api/push/vapid");
-        const { publicKey } = await vapidRes.json();
+  const registerPush = async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("/sw.js");
+      await navigator.serviceWorker.ready;
 
-        const existing = await reg.pushManager.getSubscription();
-        const sub = existing ?? await reg.pushManager.subscribe({
+      const vapidRes = await fetch("/api/push/vapid");
+      const { publicKey } = await vapidRes.json();
+
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) {
+        sub = await reg.pushManager.subscribe({
           userVisibleOnly: true,
           applicationServerKey: urlBase64ToUint8Array(publicKey),
         });
+      }
 
-        const pw = sessionStorage.getItem("admin-password") ?? "";
-        await fetch("/api/push/subscribe", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "x-admin-password": pw },
-          body: JSON.stringify(sub),
-        });
-      } catch { /* push not supported */ }
-    })();
-  }, [authenticated]);
+      const pw = sessionStorage.getItem("admin-password") ?? "";
+      await fetch("/api/push/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-password": pw },
+        body: JSON.stringify(sub),
+      });
+      setPushStatus("granted");
+    } catch { /* push not supported */ }
+  };
+
+  const handleEnablePush = async () => {
+    if (!("Notification" in window)) return;
+    const permission = await Notification.requestPermission();
+    if (permission === "granted") {
+      await registerPush();
+      toast.success("تم تفعيل الإشعارات ✅");
+    } else {
+      setPushStatus("denied");
+      toast.error("تم رفض الإشعارات — يجب السماح يدوياً من إعدادات المتصفح");
+    }
+  };
+
+  const handleTestPush = async () => {
+    const pw = sessionStorage.getItem("admin-password") ?? "";
+    const res = await fetch("/api/push/test", {
+      method: "POST",
+      headers: { "x-admin-password": pw },
+    });
+    const data = await res.json();
+    if (data.ok) toast.success(`تم إرسال إشعار تجريبي ✅ (${data.sent} جهاز)`);
+    else if (data.error === "no_subscriptions") toast.error("لا يوجد اشتراك — فعّل الإشعارات أولاً");
+    else toast.error("حدث خطأ");
+  };
 
   const toggleDark = () => {
     const next = !isDark;
@@ -427,6 +466,34 @@ export default function AdminLayout({
           </div>
 
           <div className="mr-auto flex items-center gap-2">
+            {/* زر الإشعارات */}
+            {pushStatus !== "unsupported" && (
+              pushStatus === "granted" ? (
+                <button
+                  onClick={handleTestPush}
+                  title="اضغط لإرسال إشعار تجريبي"
+                  className="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 relative"
+                  style={{ background: "rgba(52,211,153,0.15)", border: "1px solid rgba(52,211,153,0.3)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                >
+                  <Bell className="w-4 h-4 text-emerald-400" />
+                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-emerald-400" style={{ boxShadow: "0 0 4px #34d399" }} />
+                </button>
+              ) : (
+                <button
+                  onClick={handleEnablePush}
+                  title={pushStatus === "denied" ? "الإشعارات محجوبة من المتصفح" : "تفعيل الإشعارات"}
+                  className="w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
+                  style={{ background: "rgba(248,113,113,0.12)", border: "1px solid rgba(248,113,113,0.25)" }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
+                >
+                  <BellOff className="w-4 h-4 text-red-400" />
+                </button>
+              )
+            )}
+
             {/* زر الوضع الليلي */}
             <button
               onClick={toggleDark}
