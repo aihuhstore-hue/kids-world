@@ -126,7 +126,7 @@ export default function IntegrationsPage() {
   };
 
   return (
-    <div className="max-w-2xl space-y-5">
+    <div className="w-full max-w-2xl space-y-5 overflow-x-hidden">
 
       {/* Header */}
       <div className="rounded-3xl p-5 relative overflow-hidden"
@@ -147,7 +147,7 @@ export default function IntegrationsPage() {
 
       {/* البطاقات */}
       {INTEGRATIONS.map((integration) => (
-        <div key={integration.id} className="rounded-3xl bg-white overflow-hidden"
+        <div key={integration.id} className="rounded-3xl bg-white overflow-hidden w-full"
           style={{ border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
 
           {/* رأس البطاقة */}
@@ -189,17 +189,17 @@ export default function IntegrationsPage() {
           </div>
 
           {/* الحقول */}
-          <div className="p-5 space-y-4">
+          <div className="p-5 space-y-4 overflow-x-hidden">
             {integration.fields.map((field) => (
-              <div key={field.key}>
+              <div key={field.key} className="min-w-0">
                 <label className="block text-sm font-bold text-gray-700 mb-1">
                   {field.label}
                 </label>
                 {field.hint && (
                   <p className="text-xs text-gray-400 mb-1.5">{field.hint}</p>
                 )}
-                <div className="relative flex items-center gap-2">
-                  <div className="relative flex-1">
+                <div className="relative flex items-center gap-2 min-w-0">
+                  <div className="relative flex-1 min-w-0">
                     <input
                       type={field.secret && !shown[field.key] ? "password" : "text"}
                       value={values[field.key] ?? ""}
@@ -261,8 +261,8 @@ export default function IntegrationsPage() {
                   <li>اختر: <strong>Anyone</strong> في Execute as وWho has access</li>
                   <li>انسخ الرابط والصقه في الحقل أعلاه</li>
                 </ol>
-                <div className="mt-3 bg-gray-900 rounded-xl p-3 overflow-x-auto">
-                  <pre className="text-xs text-green-300 font-mono whitespace-pre-wrap">{`function doPost(e) {
+                <div className="mt-3 bg-gray-900 rounded-xl p-3 overflow-x-hidden">
+                  <pre className="text-xs text-green-300 font-mono whitespace-pre-wrap break-all">{`function doPost(e) {
   var sheet = SpreadsheetApp.getActiveSheet();
   var d = JSON.parse(e.postData.contents);
   sheet.appendRow([
