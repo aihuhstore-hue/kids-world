@@ -209,23 +209,40 @@ export async function POST(req: NextRequest) {
       const tgChatId = tgSettings.find((s) => s.key === "telegram_chat_id")?.value?.trim();
 
       if (tgToken && tgChatId) {
-        const deliveryLabel = data.deliveryType === "home" ? "🏠 منزل" : "🏢 مكتب بريد";
-        const text = [
+        const orderFull = await prisma.order.findUnique({
+          where: { id: order.id },
+          include: { items: { include: { product: true } } },
+        });
+
+        const deliveryLabel = data.deliveryType === "home" ? "🏠 توصيل للمنزل" : "🏢 مكتب بريد";
+        const itemLines = (orderFull?.items ?? []).map(
+          (item) => `  • ${item.product.name} × ${item.quantity} — ${(item.price * item.quantity).toLocaleString("ar-DZ")} دج`
+        );
+
+        const lines = [
           `🛒 *طلبية جديدة #${order.orderNumber}*`,
-          ``,
-          `👤 ${data.firstName} ${data.lastName}`,
+          `━━━━━━━━━━━━━━━`,
+          `👤 *${data.firstName} ${data.lastName}*`,
           `📱 ${data.phone}`,
           `📍 ${data.wilayaName}${data.commune ? " — " + data.commune : ""}`,
           `${deliveryLabel}`,
-          ``,
-          `💰 *${data.total.toLocaleString("ar-DZ")} دج*`,
-          data.discount ? `🏷️ خصم: ${data.discount} دج` : "",
+          `🏘️ العنوان: ${data.address}`,
+          data.notes ? `📝 ملاحظة: ${data.notes}` : "",
+          `━━━━━━━━━━━━━━━`,
+          `🛍️ *المنتجات:*`,
+          ...itemLines,
+          `━━━━━━━━━━━━━━━`,
+          `🧾 المجموع: ${data.subtotal.toLocaleString("ar-DZ")} دج`,
+          `🚚 التوصيل: ${data.deliveryFee.toLocaleString("ar-DZ")} دج`,
+          data.discount ? `🏷️ خصم: ${data.discount.toLocaleString("ar-DZ")} دج` : "",
+          data.promoCode ? `🎟️ كود: ${data.promoCode}` : "",
+          `💰 *الإجمالي: ${data.total.toLocaleString("ar-DZ")} دج*`,
         ].filter(Boolean).join("\n");
 
         await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: tgChatId, text, parse_mode: "Markdown" }),
+          body: JSON.stringify({ chat_id: tgChatId, text: lines, parse_mode: "Markdown" }),
         }).catch(() => {});
       }
     } catch { /* لا نوقف الطلب */ }
