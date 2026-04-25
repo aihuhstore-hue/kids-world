@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Loader2, Eye, EyeOff, CheckCircle, Zap, Trash2 } from "lucide-react";
+import { Save, Loader2, Eye, EyeOff, CheckCircle, Zap, Trash2, Send } from "lucide-react";
 import toast from "react-hot-toast";
 
 interface IntegrationField {
@@ -270,6 +270,30 @@ export default function IntegrationsPage() {
               )}
               {saving === integration.id ? "جاري الحفظ..." : saved[integration.id] ? "تم الحفظ!" : "حفظ"}
             </button>
+
+            {/* زر اختبار الإيميل */}
+            {integration.id === "email" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  const password = sessionStorage.getItem("admin-password") ?? "";
+                  const res = await fetch("/api/email/test", {
+                    method: "POST",
+                    headers: { "x-admin-password": password },
+                  });
+                  const data = await res.json();
+                  if (data.ok) toast.success("✅ تم إرسال إيميل تجريبي — تحقق من صندوقك");
+                  else if (data.error === "no_api_key") toast.error("أدخل API Key أولاً واحفظ");
+                  else if (data.error === "no_email") toast.error("أدخل الإيميل أولاً واحفظ");
+                  else toast.error(`خطأ: ${data.error}`);
+                }}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all duration-200 border"
+                style={{ color: "#6366f1", borderColor: "rgba(99,102,241,0.3)", background: "rgba(99,102,241,0.05)" }}
+              >
+                <Send className="w-4 h-4" />
+                إرسال إيميل تجريبي
+              </button>
+            )}
 
             {/* تعليمات Google Sheets */}
             {integration.id === "sheets" && (
