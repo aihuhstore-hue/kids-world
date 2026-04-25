@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { isAdminAuthorized } from "@/lib/admin-auth";
 import { generateOrderNumber } from "@/lib/utils";
 import { z } from "zod";
+import webPush from "web-push";
 
 const createOrderSchema = z.object({
   firstName: z.string().min(1),
@@ -132,6 +133,41 @@ export async function POST(req: NextRequest) {
         }).catch(() => {});
       }
     } catch { /* لا نوقف الطلب إذا فشل الإرسال */ }
+
+    // Push Notifications
+    try {
+      const pushSettings = await prisma.setting.findMany({
+        where: { key: { in: ["vapid_public_key", "vapid_private_key", "push_subscriptions"] } },
+      });
+      const pubKey = pushSettings.find((s) => s.key === "vapid_public_key")?.value;
+      const privKey = pushSettings.find((s) => s.key === "vapid_private_key")?.value;
+      const subsJson = pushSettings.find((s) => s.key === "push_subscriptions")?.value;
+
+      if (pubKey && privKey && subsJson) {
+        const subs: PushSubscriptionJSON[] = JSON.parse(subsJson);
+        if (subs.length > 0) {
+          webPush.setVapidDetails("mailto:admin@kidsworldj.dz", pubKey, privKey);
+          const payload = JSON.stringify({
+            title: `🛒 طلبية جديدة #${order.orderNumber}`,
+            body: `${data.firstName} ${data.lastName} — ${data.total.toLocaleString("ar-DZ")} دج`,
+            url: "/admin/orders",
+          });
+          const validSubs: PushSubscriptionJSON[] = [];
+          for (const sub of subs) {
+            try {
+              await webPush.sendNotification(sub as webPush.PushSubscription, payload);
+              validSubs.push(sub);
+            } catch { /* expired subscription */ }
+          }
+          if (validSubs.length !== subs.length) {
+            await prisma.setting.update({
+              where: { key: "push_subscriptions" },
+              data: { value: JSON.stringify(validSubs) },
+            });
+          }
+        }
+      }
+    } catch { /* لا نوقف الطلب */ }
 
     // Google Sheets Webhook
     try {

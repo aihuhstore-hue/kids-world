@@ -21,6 +21,15 @@ import {
   Sun,
 } from "lucide-react";
 
+function urlBase64ToUint8Array(base64: string): ArrayBuffer {
+  const padding = "=".repeat((4 - (base64.length % 4)) % 4);
+  const b64 = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(b64);
+  const arr = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i++) arr[i] = raw.charCodeAt(i);
+  return arr.buffer;
+}
+
 const navLinks = [
   { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/admin/products", label: "المنتجات", icon: Package },
@@ -51,6 +60,36 @@ export default function AdminLayout({
     const dark = localStorage.getItem("admin-dark") === "true";
     setIsDark(dark);
   }, []);
+
+  // تسجيل Service Worker وطلب إذن الإشعارات
+  useEffect(() => {
+    if (!authenticated) return;
+    if (!("serviceWorker" in navigator) || !("PushManager" in window)) return;
+
+    (async () => {
+      try {
+        const reg = await navigator.serviceWorker.register("/sw.js");
+        const permission = await Notification.requestPermission();
+        if (permission !== "granted") return;
+
+        const vapidRes = await fetch("/api/push/vapid");
+        const { publicKey } = await vapidRes.json();
+
+        const existing = await reg.pushManager.getSubscription();
+        const sub = existing ?? await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(publicKey),
+        });
+
+        const pw = sessionStorage.getItem("admin-password") ?? "";
+        await fetch("/api/push/subscribe", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-admin-password": pw },
+          body: JSON.stringify(sub),
+        });
+      } catch { /* push not supported */ }
+    })();
+  }, [authenticated]);
 
   const toggleDark = () => {
     const next = !isDark;

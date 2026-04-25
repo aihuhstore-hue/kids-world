@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
   ShoppingBag, Package, TrendingUp, Bell, Plus, Eye,
@@ -8,6 +8,29 @@ import {
   Clock, CheckCircle, XCircle, Truck, AlertCircle,
 } from "lucide-react";
 import { formatPrice, getStatusLabel } from "@/lib/utils";
+import toast from "react-hot-toast";
+
+function playCashSound() {
+  try {
+    const ctx = new AudioContext();
+    const play = (freq: number, t: number, dur: number, vol: number) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + t);
+      gain.gain.setValueAtTime(vol, ctx.currentTime + t);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + t + dur);
+      osc.start(ctx.currentTime + t);
+      osc.stop(ctx.currentTime + t + dur);
+    };
+    play(900, 0,    0.12, 0.45);
+    play(1200, 0.1, 0.12, 0.35);
+    play(1500, 0.2, 0.18, 0.25);
+    play(900, 0.35, 0.25, 0.15);
+  } catch { /* صوت غير متاح */ }
+}
 
 interface RecentOrder {
   id: string;
@@ -48,11 +71,38 @@ const DAYS_AR = ["أح","إث","ثل","أر","خم","جم","سب"];
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [calDate, setCalDate] = useState(new Date());
+  const prevNewOrders = useRef<number | null>(null);
+  const isFirstLoad = useRef(true);
 
   useEffect(() => {
     const password = sessionStorage.getItem("admin-password") ?? "";
-    fetch("/api/admin", { headers: { "x-admin-password": password } })
-      .then((r) => r.json()).then(setStats).catch(console.error);
+
+    const fetchStats = async () => {
+      try {
+        const res = await fetch("/api/admin", { headers: { "x-admin-password": password } });
+        const data: Stats = await res.json();
+        setStats(data);
+
+        if (isFirstLoad.current) {
+          isFirstLoad.current = false;
+          prevNewOrders.current = data.newOrders;
+        } else if (prevNewOrders.current !== null && data.newOrders > prevNewOrders.current) {
+          const diff = data.newOrders - prevNewOrders.current;
+          playCashSound();
+          toast.success(
+            `🛒 ${diff > 1 ? `${diff} طلبيات جديدة!` : "طلبية جديدة وصلت!"}`,
+            { duration: 5000, position: "top-center" }
+          );
+          prevNewOrders.current = data.newOrders;
+        } else {
+          prevNewOrders.current = data.newOrders;
+        }
+      } catch { /* تجاهل الخطأ */ }
+    };
+
+    fetchStats();
+    const interval = setInterval(fetchStats, 30000);
+    return () => clearInterval(interval);
   }, []);
 
   // رزنامة
