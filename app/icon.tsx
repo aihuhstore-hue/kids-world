@@ -21,12 +21,14 @@ export default function Icon() {
         <span
           style={{
             color: "white",
-            fontSize: 18,
+            fontSize: 13,
             fontWeight: 900,
             lineHeight: 1,
+            letterSpacing: -1,
+            fontFamily: "sans-serif",
           }}
         >
-          ع
+          KJ
         </span>
       </div>
     ),
