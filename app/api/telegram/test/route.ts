@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   }
 
   const text = [
-    `✅ *إشعار تجريبي — Kids World J*`,
+    `✅ <b>إشعار تجريبي — Kids World J</b>`,
     ``,
     `🛒 طلبية جديدة #TEST001`,
     `👤 محمد أحمد`,
@@ -27,16 +27,16 @@ export async function POST(req: NextRequest) {
     `📍 الجزائر العاصمة`,
     `🏠 منزل`,
     ``,
-    `💰 *2500 دج*`,
+    `💰 <b>2500 دج</b>`,
     ``,
-    `_نظام الإشعارات يعمل بشكل صحيح_ ✅`,
+    `نظام الإشعارات يعمل بشكل صحيح ✅`,
   ].join("\n");
 
   try {
     const res = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "Markdown" }),
+      body: JSON.stringify({ chat_id: chatId, text, parse_mode: "HTML" }),
     });
     const data = await res.json();
     if (data.ok) return NextResponse.json({ ok: true });

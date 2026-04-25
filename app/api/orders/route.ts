@@ -219,32 +219,40 @@ export async function POST(req: NextRequest) {
           (item) => `  • ${item.product.name} × ${item.quantity} — ${(item.price * item.quantity).toLocaleString("ar-DZ")} دج`
         );
 
+        const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
         const lines = [
-          `🛒 *طلبية جديدة #${order.orderNumber}*`,
-          `━━━━━━━━━━━━━━━`,
-          `👤 *${data.firstName} ${data.lastName}*`,
-          `📱 ${data.phone}`,
-          `📍 ${data.wilayaName}${data.commune ? " — " + data.commune : ""}`,
+          `🛒 <b>طلبية جديدة #${esc(order.orderNumber)}</b>`,
+          `───────────────`,
+          `👤 <b>${esc(data.firstName)} ${esc(data.lastName)}</b>`,
+          `📱 ${esc(data.phone)}`,
+          `📍 ${esc(data.wilayaName)}${data.commune ? " — " + esc(data.commune) : ""}`,
           `${deliveryLabel}`,
-          data.notes ? `📝 ملاحظة: ${data.notes}` : "",
-          `━━━━━━━━━━━━━━━`,
-          `🛍️ *المنتجات:*`,
-          ...itemLines,
-          `━━━━━━━━━━━━━━━`,
-          `🧾 المجموع: ${data.subtotal.toLocaleString("ar-DZ")} دج`,
-          `🚚 التوصيل: ${data.deliveryFee.toLocaleString("ar-DZ")} دج`,
-          data.discount ? `🏷️ خصم: ${data.discount.toLocaleString("ar-DZ")} دج` : "",
-          data.promoCode ? `🎟️ كود: ${data.promoCode}` : "",
-          `💰 *الإجمالي: ${data.total.toLocaleString("ar-DZ")} دج*`,
+          data.notes ? `📝 ${esc(data.notes)}` : "",
+          `───────────────`,
+          `🛍️ <b>المنتجات:</b>`,
+          ...itemLines.map(esc),
+          `───────────────`,
+          `🧾 المجموع: ${data.subtotal} دج`,
+          `🚚 التوصيل: ${data.deliveryFee} دج`,
+          data.discount ? `🏷️ خصم: ${data.discount} دج` : "",
+          data.promoCode ? `🎟️ كود: ${esc(data.promoCode)}` : "",
+          `💰 <b>الإجمالي: ${data.total} دج</b>`,
         ].filter(Boolean).join("\n");
 
-        await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+        const tgRes = await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ chat_id: tgChatId, text: lines, parse_mode: "Markdown" }),
-        }).catch(() => {});
+          body: JSON.stringify({ chat_id: tgChatId, text: lines, parse_mode: "HTML" }),
+        });
+        if (!tgRes.ok) {
+          const tgErr = await tgRes.text();
+          console.error("Telegram error:", tgErr);
+        }
       }
-    } catch { /* لا نوقف الطلب */ }
+    } catch (tgCatchErr) {
+      console.error("Telegram catch:", tgCatchErr);
+    }
 
     return NextResponse.json(
       { orderNumber: order.orderNumber, id: order.id },
