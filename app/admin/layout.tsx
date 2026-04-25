@@ -445,6 +445,14 @@ export default function AdminLayout({
             borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
             boxShadow: isDark ? "0 1px 12px rgba(0,0,0,0.4)" : "0 1px 12px rgba(0,0,0,0.06)",
           }}>
+          {/* زر القائمة على اليمين */}
+          <button onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
+            style={{ background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)", zIndex: 30, position: "relative" }}
+          >
+            {sidebarOpen ? <X className="w-5 h-5" style={{ color: isDark ? "#e2e8f0" : "#374151" }} /> : <Menu className="w-5 h-5" style={{ color: isDark ? "#e2e8f0" : "#374151" }} />}
+          </button>
+
           <div className="flex items-center gap-2 min-w-0 flex-1">
             {(() => {
               const active = navLinks.find((l) => l.href === pathname || (l.href !== "/admin" && pathname.startsWith(l.href)));
@@ -459,13 +467,6 @@ export default function AdminLayout({
           </div>
 
           <div className="mr-auto flex-shrink-0 flex items-center gap-2">
-            {/* زر القائمة — على اليسار بعيداً عن السايدبار */}
-            <button onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
-              style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)" }}
-            >
-              {sidebarOpen ? <X className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} /> : <Menu className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} />}
-            </button>
             {/* زر الإشعارات */}
             {pushStatus !== "unsupported" && (
               pushStatus === "granted" ? (
@@ -523,7 +524,7 @@ export default function AdminLayout({
           </div>
         </header>
 
-        <div className="p-4 md:p-6">{children}</div>
+        <div className="p-4 md:p-6 overflow-x-hidden">{children}</div>
       </div>
     </div>
   );
