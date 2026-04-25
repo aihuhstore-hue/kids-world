@@ -89,10 +89,17 @@ export default function AdminDashboard() {
         } else if (prevNewOrders.current !== null && data.newOrders > prevNewOrders.current) {
           const diff = data.newOrders - prevNewOrders.current;
           playCashSound();
-          toast.success(
-            `🛒 ${diff > 1 ? `${diff} طلبيات جديدة!` : "طلبية جديدة وصلت!"}`,
-            { duration: 5000, position: "top-center" }
-          );
+          const msg = diff > 1 ? `${diff} طلبيات جديدة!` : "طلبية جديدة وصلت!";
+          toast.success(`🛒 ${msg}`, { duration: 5000, position: "top-center" });
+          // إشعار مباشر من المتصفح (يعمل دائماً عند فتح الصفحة)
+          if (typeof Notification !== "undefined" && Notification.permission === "granted") {
+            new Notification(`🛒 ${msg}`, {
+              body: data.recentOrders?.[0]
+                ? `${data.recentOrders[0].firstName} ${data.recentOrders[0].lastName} — ${data.recentOrders[0].total.toLocaleString("ar-DZ")} دج`
+                : "",
+              dir: "rtl",
+            });
+          }
           prevNewOrders.current = data.newOrders;
         } else {
           prevNewOrders.current = data.newOrders;
