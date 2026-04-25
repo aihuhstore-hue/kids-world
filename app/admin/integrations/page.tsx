@@ -277,15 +277,23 @@ export default function IntegrationsPage() {
                 <button
                   type="button"
                   onClick={async () => {
-                    const password = sessionStorage.getItem("admin-password") ?? "";
-                    const res = await fetch("/api/telegram/test", {
-                      method: "POST",
-                      headers: { "x-admin-password": password },
-                    });
-                    const d = await res.json();
-                    if (d.ok) toast.success("✅ وصل الإشعار على تلقرام!");
-                    else if (d.error === "no_config") toast.error("احفظ البيانات أولاً");
-                    else toast.error("خطأ: " + (d.error ?? "غير معروف"));
+                    try {
+                      const password = sessionStorage.getItem("admin-password") ?? "";
+                      const res = await fetch("/api/telegram/test", {
+                        method: "POST",
+                        headers: { "x-admin-password": password },
+                      });
+                      if (!res.ok && res.status === 404) {
+                        toast.error("المسار غير موجود (404) — جرب إعادة تحميل الصفحة");
+                        return;
+                      }
+                      const d = await res.json();
+                      if (d.ok) toast.success("✅ وصل الإشعار على تلقرام!");
+                      else if (d.error === "no_config") toast.error("احفظ البيانات أولاً ثم اضغط حفظ");
+                      else toast.error("خطأ " + res.status + ": " + (d.error ?? d.message ?? "غير معروف"));
+                    } catch (e) {
+                      toast.error("خطأ في الاتصال: " + String(e));
+                    }
                   }}
                   className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-colors"
                 >
