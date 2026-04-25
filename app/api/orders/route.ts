@@ -200,6 +200,36 @@ export async function POST(req: NextRequest) {
       }
     } catch { /* لا نوقف الطلب إذا فشل الإرسال لـ Sheets */ }
 
+    // Telegram Notification
+    try {
+      const tgSettings = await prisma.setting.findMany({
+        where: { key: { in: ["telegram_bot_token", "telegram_chat_id"] } },
+      });
+      const tgToken = tgSettings.find((s) => s.key === "telegram_bot_token")?.value?.trim();
+      const tgChatId = tgSettings.find((s) => s.key === "telegram_chat_id")?.value?.trim();
+
+      if (tgToken && tgChatId) {
+        const deliveryLabel = data.deliveryType === "home" ? "🏠 منزل" : "🏢 مكتب بريد";
+        const text = [
+          `🛒 *طلبية جديدة #${order.orderNumber}*`,
+          ``,
+          `👤 ${data.firstName} ${data.lastName}`,
+          `📱 ${data.phone}`,
+          `📍 ${data.wilayaName}${data.commune ? " — " + data.commune : ""}`,
+          `${deliveryLabel}`,
+          ``,
+          `💰 *${data.total.toLocaleString("ar-DZ")} دج*`,
+          data.discount ? `🏷️ خصم: ${data.discount} دج` : "",
+        ].filter(Boolean).join("\n");
+
+        await fetch(`https://api.telegram.org/bot${tgToken}/sendMessage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ chat_id: tgChatId, text, parse_mode: "Markdown" }),
+        }).catch(() => {});
+      }
+    } catch { /* لا نوقف الطلب */ }
+
     return NextResponse.json(
       { orderNumber: order.orderNumber, id: order.id },
       { status: 201 }

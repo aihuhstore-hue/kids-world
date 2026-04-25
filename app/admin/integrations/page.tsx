@@ -68,6 +68,28 @@ const INTEGRATIONS = [
     ] as IntegrationField[],
   },
   {
+    id: "telegram",
+    title: "Telegram — إشعارات الطلبيات",
+    emoji: "✈️",
+    color: "from-sky-500 to-blue-600",
+    glow: "rgba(14,165,233,0.3)",
+    fields: [
+      {
+        key: "telegram_bot_token",
+        label: "Bot Token",
+        placeholder: "7xxxxxxxxx:AAF...",
+        secret: true,
+        hint: "من @BotFather في تلقرام → /newbot",
+      },
+      {
+        key: "telegram_chat_id",
+        label: "Chat ID",
+        placeholder: "-100xxxxxxxxxx أو رقمك الشخصي",
+        hint: "ابدأ محادثة مع البوت ثم افتح: api.telegram.org/bot{TOKEN}/getUpdates",
+      },
+    ] as IntegrationField[],
+  },
+  {
     id: "sheets",
     title: "Google Sheets",
     emoji: "📊",
@@ -248,6 +270,41 @@ export default function IntegrationsPage() {
               )}
               {saving === integration.id ? "جاري الحفظ..." : saved[integration.id] ? "تم الحفظ!" : "حفظ"}
             </button>
+
+            {/* تعليمات Telegram */}
+            {integration.id === "telegram" && (
+              <div className="mt-3 space-y-3">
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const password = sessionStorage.getItem("admin-password") ?? "";
+                    const res = await fetch("/api/telegram/test", {
+                      method: "POST",
+                      headers: { "x-admin-password": password },
+                    });
+                    const d = await res.json();
+                    if (d.ok) toast.success("✅ وصل الإشعار على تلقرام!");
+                    else if (d.error === "no_config") toast.error("احفظ البيانات أولاً");
+                    else toast.error("خطأ: " + (d.error ?? "غير معروف"));
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-sky-700 bg-sky-50 hover:bg-sky-100 border border-sky-200 transition-colors"
+                >
+                  ✈️ إرسال إشعار تجريبي
+                </button>
+                <div className="p-4 rounded-2xl bg-sky-50 border border-sky-100">
+                  <p className="text-xs font-black text-sky-800 mb-2">📋 خطوات الإعداد:</p>
+                  <ol className="text-xs text-sky-700 space-y-1.5 list-decimal list-inside">
+                    <li>افتح تلقرام وابحث عن <strong>@BotFather</strong></li>
+                    <li>أرسل <strong>/newbot</strong> واتبع التعليمات</li>
+                    <li>احفظ الـ <strong>Token</strong> في الحقل أعلاه</li>
+                    <li>ابدأ محادثة مع البوت (اضغط Start)</li>
+                    <li>افتح في المتصفح: <strong>api.telegram.org/bot&#123;TOKEN&#125;/getUpdates</strong></li>
+                    <li>انسخ رقم <strong>chat.id</strong> والصقه في حقل Chat ID</li>
+                    <li>اضغط حفظ ثم جرب الإشعار التجريبي</li>
+                  </ol>
+                </div>
+              </div>
+            )}
 
             {/* تعليمات Google Sheets */}
             {integration.id === "sheets" && (
