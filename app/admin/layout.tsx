@@ -446,26 +446,26 @@ export default function AdminLayout({
             boxShadow: isDark ? "0 1px 12px rgba(0,0,0,0.4)" : "0 1px 12px rgba(0,0,0,0.06)",
           }}>
           <button onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
+            className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
             style={{ background: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.05)" }}
           >
-            {sidebarOpen ? <X className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : undefined }} /> : <Menu className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : undefined }} />}
+            {sidebarOpen ? <X className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} /> : <Menu className="w-4 h-4" style={{ color: isDark ? "#e2e8f0" : "#374151" }} />}
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             {(() => {
               const active = navLinks.find((l) => l.href === pathname || (l.href !== "/admin" && pathname.startsWith(l.href)));
               const gradient = active ? (navColors[active.href] ?? "from-violet-500 to-purple-600") : "from-violet-500 to-purple-600";
               return active ? (
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center bg-gradient-to-br ${gradient}`}>
+                <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center bg-gradient-to-br ${gradient}`}>
                   <active.icon className="w-3.5 h-3.5 text-white" />
                 </div>
               ) : null;
             })()}
-            <h1 className="font-black text-base" style={{ color: isDark ? "#f1f5f9" : "#1f2937" }}>{activeLabel}</h1>
+            <h1 className="font-black text-base truncate" style={{ color: isDark ? "#f1f5f9" : "#1f2937" }}>{activeLabel}</h1>
           </div>
 
-          <div className="mr-auto flex items-center gap-2">
+          <div className="mr-auto flex-shrink-0 flex items-center gap-2">
             {/* زر الإشعارات */}
             {pushStatus !== "unsupported" && (
               pushStatus === "granted" ? (
@@ -512,7 +512,7 @@ export default function AdminLayout({
               }
             </button>
 
-            <Link href="/" className="flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200"
+            <Link href="/" className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200"
               style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)", background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}
               onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"; e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"; e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"; }}
