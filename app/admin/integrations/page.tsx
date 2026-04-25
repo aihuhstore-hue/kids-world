@@ -68,6 +68,28 @@ const INTEGRATIONS = [
     ] as IntegrationField[],
   },
   {
+    id: "email",
+    title: "إشعارات البريد الإلكتروني",
+    emoji: "📧",
+    color: "from-indigo-500 to-violet-600",
+    glow: "rgba(99,102,241,0.25)",
+    fields: [
+      {
+        key: "resend_api_key",
+        label: "Resend API Key",
+        placeholder: "re_xxxxxxxxxxxxxxxxxxxxxxxxxx",
+        secret: true,
+        hint: "من resend.com — مجاني 3000 إيميل/شهر",
+      },
+      {
+        key: "notification_email",
+        label: "إيميل الاستقبال",
+        placeholder: "you@gmail.com",
+        hint: "الإيميل الذي سيستقبل إشعارات الطلبيات الجديدة",
+      },
+    ] as IntegrationField[],
+  },
+  {
     id: "sheets",
     title: "Google Sheets",
     emoji: "📊",

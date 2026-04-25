@@ -4,6 +4,7 @@ import { isAdminAuthorized } from "@/lib/admin-auth";
 import { generateOrderNumber } from "@/lib/utils";
 import { z } from "zod";
 import webPush from "web-push";
+import { Resend } from "resend";
 
 const createOrderSchema = z.object({
   firstName: z.string().min(1),
@@ -166,6 +167,42 @@ export async function POST(req: NextRequest) {
             });
           }
         }
+      }
+    } catch { /* لا نوقف الطلب */ }
+
+    // Email Notification
+    try {
+      const emailSettings = await prisma.setting.findMany({
+        where: { key: { in: ["resend_api_key", "notification_email"] } },
+      });
+      const resendKey = emailSettings.find((s) => s.key === "resend_api_key")?.value?.trim();
+      const notifEmail = emailSettings.find((s) => s.key === "notification_email")?.value?.trim();
+
+      if (resendKey && notifEmail) {
+        const resend = new Resend(resendKey);
+        await resend.emails.send({
+          from: "Kids World J <onboarding@resend.dev>",
+          to: notifEmail,
+          subject: `🛒 طلبية جديدة #${order.orderNumber} — ${data.firstName} ${data.lastName}`,
+          html: `
+            <div dir="rtl" style="font-family:Arial,sans-serif;max-width:500px;margin:0 auto;background:#f9fafb;padding:24px;border-radius:12px;">
+              <div style="background:linear-gradient(135deg,#1a1a3e,#0f3460);padding:20px;border-radius:10px;text-align:center;margin-bottom:20px;">
+                <h1 style="color:#fff;margin:0;font-size:20px;">🛒 طلبية جديدة!</h1>
+                <p style="color:rgba(255,255,255,0.7);margin:4px 0 0;font-size:14px;">#${order.orderNumber}</p>
+              </div>
+              <table style="width:100%;border-collapse:collapse;">
+                <tr><td style="padding:8px 0;color:#6b7280;font-size:13px;">الاسم</td><td style="padding:8px 0;font-weight:bold;color:#111;">${data.firstName} ${data.lastName}</td></tr>
+                <tr><td style="padding:8px 0;color:#6b7280;font-size:13px;">الهاتف</td><td style="padding:8px 0;font-weight:bold;color:#111;">${data.phone}</td></tr>
+                <tr><td style="padding:8px 0;color:#6b7280;font-size:13px;">الولاية</td><td style="padding:8px 0;font-weight:bold;color:#111;">${data.wilayaName}</td></tr>
+                <tr><td style="padding:8px 0;color:#6b7280;font-size:13px;">التوصيل</td><td style="padding:8px 0;font-weight:bold;color:#111;">${data.deliveryType === "home" ? "منزل" : "مكتب بريد"}</td></tr>
+                <tr><td style="padding:8px 0;color:#6b7280;font-size:13px;">المجموع</td><td style="padding:8px 0;font-size:18px;font-weight:900;color:#10b981;">${data.total.toLocaleString("ar-DZ")} دج</td></tr>
+              </table>
+              <div style="margin-top:20px;text-align:center;">
+                <a href="https://kidsworldj.store/admin/orders" style="background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px;">عرض الطلبية</a>
+              </div>
+            </div>
+          `,
+        });
       }
     } catch { /* لا نوقف الطلب */ }
 
