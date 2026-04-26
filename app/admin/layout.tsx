@@ -58,6 +58,16 @@ export default function AdminLayout({
   const [isDark, setIsDark] = useState(false);
   const [pushStatus, setPushStatus] = useState<"unknown" | "granted" | "denied" | "unsupported">("unknown");
 
+  // استرجاع كلمة السر
+  const [showRecovery, setShowRecovery] = useState(false);
+  const [recoveryMethod, setRecoveryMethod] = useState<"key" | "telegram">("key");
+  const [recoveryKey, setRecoveryKey] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
+  const [recoveryLoading, setRecoveryLoading] = useState(false);
+  const [recoveryMsg, setRecoveryMsg] = useState<{ ok: boolean; text: string } | null>(null);
+
   useEffect(() => {
     const stored = sessionStorage.getItem("admin-auth");
     if (stored === "true") setAuthenticated(true);
@@ -134,6 +144,62 @@ export default function AdminLayout({
     const next = !isDark;
     setIsDark(next);
     localStorage.setItem("admin-dark", String(next));
+  };
+
+  const handleSendOTP = async () => {
+    setRecoveryLoading(true);
+    setRecoveryMsg(null);
+    try {
+      const res = await fetch("/api/admin/recover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ method: "telegram_send" }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setOtpSent(true);
+        setRecoveryMsg({ ok: true, text: "✅ تم إرسال الكود إلى تلغرام" });
+      } else {
+        setRecoveryMsg({ ok: false, text: data.error ?? "فشل الإرسال" });
+      }
+    } catch {
+      setRecoveryMsg({ ok: false, text: "خطأ في الاتصال" });
+    } finally {
+      setRecoveryLoading(false);
+    }
+  };
+
+  const handleRecovery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setRecoveryLoading(true);
+    setRecoveryMsg(null);
+    try {
+      const body =
+        recoveryMethod === "key"
+          ? { method: "key", recoveryKey, newPassword: newPass }
+          : { method: "telegram_verify", code: otpCode, newPassword: newPass };
+
+      const res = await fetch("/api/admin/recover", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setRecoveryMsg({ ok: true, text: "✅ تم تغيير كلمة السر — يمكنك الدخول الآن" });
+        setShowRecovery(false);
+        setRecoveryKey("");
+        setOtpCode("");
+        setNewPass("");
+        setOtpSent(false);
+      } else {
+        setRecoveryMsg({ ok: false, text: data.error ?? "حدث خطأ" });
+      }
+    } catch {
+      setRecoveryMsg({ ok: false, text: "خطأ في الاتصال" });
+    } finally {
+      setRecoveryLoading(false);
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -314,6 +380,146 @@ export default function AdminLayout({
                 ) : "تسجيل الدخول"}
               </button>
             </form>
+
+            {/* زر نسيت كلمة السر */}
+            <div className="mt-3 text-center">
+              <button
+                type="button"
+                onClick={() => { setShowRecovery(!showRecovery); setRecoveryMsg(null); }}
+                className="text-xs transition-colors"
+                style={{ color: showRecovery ? "rgba(167,139,250,0.9)" : "rgba(255,255,255,0.25)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "rgba(167,139,250,0.9)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = showRecovery ? "rgba(167,139,250,0.9)" : "rgba(255,255,255,0.25)"; }}
+              >
+                {showRecovery ? "← رجوع لتسجيل الدخول" : "نسيت كلمة السر؟"}
+              </button>
+            </div>
+
+            {/* لوحة الاسترجاع */}
+            {showRecovery && (
+              <div className="mt-4 space-y-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "1rem" }}>
+
+                {/* تبديل الطريقة */}
+                <div className="flex rounded-2xl overflow-hidden" style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                  {(["key", "telegram"] as const).map((m) => (
+                    <button
+                      key={m}
+                      type="button"
+                      onClick={() => { setRecoveryMethod(m); setRecoveryMsg(null); setOtpSent(false); }}
+                      className="flex-1 py-2.5 text-xs font-semibold transition-all"
+                      style={recoveryMethod === m
+                        ? { background: "linear-gradient(135deg,rgba(124,58,237,0.6),rgba(79,70,229,0.6))", color: "#fff" }
+                        : { color: "rgba(255,255,255,0.35)" }
+                      }
+                    >
+                      {m === "key" ? "🔑 مفتاح الاسترجاع" : "📱 كود تلغرام"}
+                    </button>
+                  ))}
+                </div>
+
+                {/* رسالة النتيجة */}
+                {recoveryMsg && (
+                  <div className="px-3 py-2.5 rounded-xl text-xs text-center font-medium"
+                    style={{
+                      background: recoveryMsg.ok ? "rgba(52,211,153,0.12)" : "rgba(239,68,68,0.12)",
+                      border: `1px solid ${recoveryMsg.ok ? "rgba(52,211,153,0.3)" : "rgba(239,68,68,0.3)"}`,
+                      color: recoveryMsg.ok ? "#34d399" : "#f87171",
+                    }}>
+                    {recoveryMsg.text}
+                  </div>
+                )}
+
+                {/* ── مفتاح الاسترجاع ── */}
+                {recoveryMethod === "key" && (
+                  <form onSubmit={handleRecovery} className="space-y-3">
+                    <input
+                      type="text"
+                      value={recoveryKey}
+                      onChange={(e) => setRecoveryKey(e.target.value)}
+                      placeholder="مفتاح الاسترجاع"
+                      className="w-full px-4 py-3 rounded-2xl text-white placeholder-gray-600 outline-none text-sm"
+                      style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+                      dir="ltr"
+                      autoComplete="off"
+                    />
+                    <input
+                      type="password"
+                      value={newPass}
+                      onChange={(e) => setNewPass(e.target.value)}
+                      placeholder="كلمة السر الجديدة"
+                      className="w-full px-4 py-3 rounded-2xl text-white placeholder-gray-600 outline-none text-sm"
+                      style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={recoveryLoading || !recoveryKey || !newPass}
+                      className="w-full py-3 rounded-2xl font-bold text-white text-sm disabled:opacity-40 transition-all"
+                      style={{ background: "linear-gradient(135deg,#7c3aed,#4f46e5)" }}
+                    >
+                      {recoveryLoading ? "جاري التغيير..." : "تغيير كلمة السر"}
+                    </button>
+                  </form>
+                )}
+
+                {/* ── كود تلغرام ── */}
+                {recoveryMethod === "telegram" && (
+                  <div className="space-y-3">
+                    {!otpSent ? (
+                      <button
+                        type="button"
+                        onClick={handleSendOTP}
+                        disabled={recoveryLoading}
+                        className="w-full py-3 rounded-2xl font-bold text-white text-sm disabled:opacity-40 transition-all"
+                        style={{ background: "linear-gradient(135deg,#0088cc,#005f99)" }}
+                      >
+                        {recoveryLoading ? "جاري الإرسال..." : "📨 إرسال كود إلى تلغرام"}
+                      </button>
+                    ) : (
+                      <form onSubmit={handleRecovery} className="space-y-3">
+                        <p className="text-xs text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
+                          تحقق من تلغرام وأدخل الكود المكون من 6 أرقام
+                        </p>
+                        <input
+                          type="text"
+                          value={otpCode}
+                          onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                          placeholder="_ _ _ _ _ _"
+                          className="w-full px-4 py-3 rounded-2xl text-white placeholder-gray-600 outline-none text-sm text-center tracking-[0.5em] font-mono"
+                          style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)", fontSize: "1.1rem" }}
+                          dir="ltr"
+                          maxLength={6}
+                          inputMode="numeric"
+                        />
+                        <input
+                          type="password"
+                          value={newPass}
+                          onChange={(e) => setNewPass(e.target.value)}
+                          placeholder="كلمة السر الجديدة"
+                          className="w-full px-4 py-3 rounded-2xl text-white placeholder-gray-600 outline-none text-sm"
+                          style={{ background: "rgba(255,255,255,0.07)", border: "1px solid rgba(255,255,255,0.1)" }}
+                        />
+                        <button
+                          type="submit"
+                          disabled={recoveryLoading || otpCode.length < 6 || !newPass}
+                          className="w-full py-3 rounded-2xl font-bold text-white text-sm disabled:opacity-40 transition-all"
+                          style={{ background: "linear-gradient(135deg,#7c3aed,#4f46e5)" }}
+                        >
+                          {recoveryLoading ? "جاري التحقق..." : "تأكيد وتغيير كلمة السر"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => { setOtpSent(false); setOtpCode(""); setRecoveryMsg(null); }}
+                          className="w-full text-xs transition-colors"
+                          style={{ color: "rgba(255,255,255,0.25)" }}
+                        >
+                          إعادة إرسال الكود
+                        </button>
+                      </form>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
 
             <p className="text-center text-xs mt-6" style={{ color: "rgba(255,255,255,0.2)" }}>
               عالم الأطفال © {new Date().getFullYear()}
