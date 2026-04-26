@@ -38,9 +38,11 @@ interface RecentOrder {
   firstName: string;
   lastName: string;
   wilayaName: string;
+  deliveryType: string;
   total: number;
   status: string;
   createdAt: string;
+  items: { quantity: number; product: { name: string } }[];
 }
 
 interface Stats {
@@ -324,58 +326,127 @@ export default function AdminDashboard() {
 
       {/* آخر الطلبيات */}
       {stats?.recentOrders && stats.recentOrders.length > 0 && (
-        <div className="rounded-3xl p-5 bg-white"
+        <div className="rounded-3xl bg-white overflow-hidden"
           style={{ border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-          <div className="flex items-center justify-between mb-4">
+
+          {/* رأس القسم */}
+          <div className="px-5 py-4 flex items-center justify-between"
+            style={{ borderBottom: "1px solid rgba(0,0,0,0.05)" }}>
             <h3 className="font-black text-gray-800 flex items-center gap-2">
               <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-gradient-to-br from-rose-500 to-pink-600">
                 <ShoppingBag className="w-3.5 h-3.5 text-white" />
               </div>
               آخر الطلبيات
+              {stats.newOrders > 0 && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-black text-white"
+                  style={{ background: "linear-gradient(135deg,#818cf8,#6d28d9)" }}>
+                  {stats.newOrders} جديد
+                </span>
+              )}
             </h3>
             <Link href="/admin/orders"
-              className="text-xs font-bold px-3 py-1.5 rounded-xl transition-all"
+              className="text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1 transition-all"
               style={{ background: "rgba(0,0,0,0.04)", color: "#6b7280" }}
               onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.08)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.04)"; }}>
               عرض الكل
+              <ArrowLeft className="w-3 h-3" />
             </Link>
           </div>
-          <div className="space-y-2">
+
+          {/* قائمة الطلبيات */}
+          <div className="divide-y" style={{ borderColor: "rgba(0,0,0,0.04)" }}>
             {stats.recentOrders.map((order) => {
-              const statusColors: Record<string, { bg: string; color: string }> = {
-                NEW: { bg: "rgba(129,140,248,0.12)", color: "#818cf8" },
-                PREPARING: { bg: "rgba(251,191,36,0.12)", color: "#f59e0b" },
-                SHIPPED: { bg: "rgba(167,139,250,0.12)", color: "#a78bfa" },
-                DELIVERED: { bg: "rgba(52,211,153,0.12)", color: "#34d399" },
-                CANCELLED: { bg: "rgba(248,113,113,0.12)", color: "#f87171" },
+              const statusMap: Record<string, { bg: string; color: string; label: string }> = {
+                NEW:       { bg: "rgba(99,102,241,0.1)",  color: "#6366f1", label: "جديد" },
+                PREPARING: { bg: "rgba(245,158,11,0.1)",  color: "#f59e0b", label: "قيد التحضير" },
+                SHIPPED:   { bg: "rgba(139,92,246,0.1)",  color: "#8b5cf6", label: "تم الشحن" },
+                DELIVERED: { bg: "rgba(16,185,129,0.1)",  color: "#10b981", label: "مُسلَّم" },
+                CANCELLED: { bg: "rgba(239,68,68,0.1)",   color: "#ef4444", label: "ملغى" },
               };
-              const sc = statusColors[order.status] ?? { bg: "rgba(0,0,0,0.05)", color: "#6b7280" };
+              const sc = statusMap[order.status] ?? { bg: "rgba(0,0,0,0.05)", color: "#6b7280", label: order.status };
+              const productsSummary = order.items
+                .map((i) => `${i.product.name}${i.quantity > 1 ? ` ×${i.quantity}` : ""}`)
+                .join("، ");
+              const isNew = order.status === "NEW";
+              const password = typeof window !== "undefined" ? sessionStorage.getItem("admin-password") ?? "" : "";
+
+              const updateStatus = async (newStatus: string, e: React.MouseEvent) => {
+                e.preventDefault();
+                e.stopPropagation();
+                try {
+                  await fetch("/api/admin", {
+                    method: "PATCH",
+                    headers: { "Content-Type": "application/json", "x-admin-password": password },
+                    body: JSON.stringify({ orderId: order.id, status: newStatus }),
+                  });
+                  const res = await fetch("/api/admin", { headers: { "x-admin-password": password } });
+                  setStats(await res.json());
+                  toast.success(newStatus === "PREPARING" ? "✅ تم تأكيد الطلبية" : "❌ تم إلغاء الطلبية");
+                } catch { toast.error("حدث خطأ"); }
+              };
+
               return (
-                <Link key={order.id} href="/admin/orders"
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-2xl transition-all duration-200 group"
-                  style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.04)" }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.05)"; e.currentTarget.style.transform = "translateX(-2px)"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.02)"; e.currentTarget.style.transform = "translateX(0)"; }}>
+                <div key={order.id} className="px-5 py-3.5 flex items-center gap-3 transition-colors hover:bg-gray-50">
+                  {/* الحالة */}
+                  <span className="text-xs px-2.5 py-1 rounded-full font-black flex-shrink-0"
+                    style={{ background: sc.bg, color: sc.color }}>
+                    {sc.label}
+                  </span>
+
+                  {/* المعلومات */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-mono text-xs font-black text-gray-600">#{order.orderNumber}</span>
-                      <span className="text-sm font-semibold text-gray-800 truncate">{order.firstName} {order.lastName}</span>
-                      <span className="text-xs text-gray-400">{order.wilayaName}</span>
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-gray-400">#{order.orderNumber}</span>
+                      <span className="text-sm font-black text-gray-800 truncate">
+                        {order.firstName} {order.lastName}
+                      </span>
+                      <span className="text-xs text-gray-400 hidden sm:inline">{order.wilayaName}</span>
+                      <span className="text-xs flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }}>
+                        {order.deliveryType === "home" ? "🏠" : "🏢"}
+                      </span>
                     </div>
-                    <p className="text-xs text-gray-400 mt-0.5">
-                      {new Date(order.createdAt).toLocaleString("ar-DZ", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
-                    </p>
+                    {productsSummary && (
+                      <p className="text-xs text-gray-400 mt-0.5 truncate">{productsSummary}</p>
+                    )}
                   </div>
-                  <span className="text-sm font-black flex-shrink-0" style={{ color: sc.color }}>
+
+                  {/* السعر */}
+                  <span className="text-sm font-black flex-shrink-0 text-gray-800">
                     {formatPrice(order.total)}
                   </span>
-                  <span className="text-xs px-2 py-1 rounded-xl font-bold flex-shrink-0"
-                    style={{ background: sc.bg, color: sc.color }}>
-                    {getStatusLabel(order.status)}
-                  </span>
-                  <ArrowLeft className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity text-gray-400" />
-                </Link>
+
+                  {/* أزرار الإجراء */}
+                  {isNew ? (
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                      <button
+                        onClick={(e) => updateStatus("PREPARING", e)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all"
+                        style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(16,185,129,0.25)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(16,185,129,0.12)"; }}
+                      >
+                        <CheckCircle className="w-3 h-3" />
+                        تأكيد
+                      </button>
+                      <button
+                        onClick={(e) => updateStatus("CANCELLED", e)}
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all"
+                        style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.22)"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
+                      >
+                        <XCircle className="w-3 h-3" />
+                        إلغاء
+                      </button>
+                    </div>
+                  ) : (
+                    <Link href="/admin/orders"
+                      className="flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-colors hover:bg-gray-100">
+                      <ArrowLeft className="w-3.5 h-3.5 text-gray-300" />
+                    </Link>
+                  )}
+                </div>
               );
             })}
           </div>

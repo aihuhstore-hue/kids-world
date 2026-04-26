@@ -69,9 +69,9 @@ export async function GET(req: NextRequest) {
       where: { status: { not: "CANCELLED" }, createdAt: { gte: startOfLastMonth, lte: endOfLastMonth } },
       _sum: { total: true, deliveryFee: true },
     }),
-    // آخر 6 طلبيات
+    // آخر 8 طلبيات
     prisma.order.findMany({
-      take: 6,
+      take: 8,
       orderBy: { createdAt: "desc" },
       select: {
         id: true,
@@ -79,9 +79,16 @@ export async function GET(req: NextRequest) {
         firstName: true,
         lastName: true,
         wilayaName: true,
+        deliveryType: true,
         total: true,
         status: true,
         createdAt: true,
+        items: {
+          select: {
+            quantity: true,
+            product: { select: { name: true } },
+          },
+        },
       },
     }),
   ]);
