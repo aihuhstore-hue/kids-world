@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import {
   ShoppingBag, Package, TrendingUp, Bell, Plus, Eye,
-  ArrowLeft, Sparkles, Calendar, ChevronLeft, ChevronRight,
+  ArrowLeft, Sparkles, Calendar,
   Clock, CheckCircle, XCircle, Truck, AlertCircle,
 } from "lucide-react";
 import { formatPrice, getStatusLabel } from "@/lib/utils";
@@ -67,12 +67,10 @@ interface Stats {
   recentOrders?: RecentOrder[];
 }
 
-const MONTHS_AR = ["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
-const DAYS_AR = ["أح","إث","ثل","أر","خم","جم","سب"];
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
-  const [calDate, setCalDate] = useState(new Date());
+  const [updatingId, setUpdatingId] = useState<string | null>(null);
   const prevNewOrders = useRef<number | null>(null);
   const isFirstLoad = useRef(true);
 
@@ -114,16 +112,23 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // رزنامة
-  const year = calDate.getFullYear();
-  const month = calDate.getMonth();
-  const firstDay = new Date(year, month, 1).getDay();
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = new Date();
-  const calDays: (number | null)[] = [...Array(firstDay).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
 
-  const prevMonth = () => setCalDate(new Date(year, month - 1, 1));
-  const nextMonth = () => setCalDate(new Date(year, month + 1, 1));
+  const quickUpdate = async (orderId: string, newStatus: string) => {
+    const password = sessionStorage.getItem("admin-password") ?? "";
+    setUpdatingId(orderId);
+    try {
+      await fetch("/api/admin", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        body: JSON.stringify({ orderId, status: newStatus }),
+      });
+      const res = await fetch("/api/admin", { headers: { "x-admin-password": password } });
+      setStats(await res.json());
+      toast.success(newStatus === "DELIVERED" ? "✅ تم تسليم الطلبية" : newStatus === "SHIPPED" ? "🚚 تم الشحن" : "✅ تم التأكيد");
+    } catch { toast.error("حدث خطأ"); }
+    finally { setUpdatingId(null); }
+  };
 
   const growthVsYesterday = stats
     ? stats.yesterdayOrders === 0
@@ -246,50 +251,99 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* رزنامة */}
+        {/* طلبيات تحتاج إجراء */}
         <div className="rounded-3xl p-5 bg-white"
           style={{ border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-black text-gray-800 flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-cyan-500">
-                <Calendar className="w-3.5 h-3.5 text-white" />
-              </div>
-              الرزنامة
-            </h3>
-            <div className="flex items-center gap-1">
-              <button onClick={prevMonth} className="w-7 h-7 rounded-xl flex items-center justify-center transition-all hover:bg-gray-100">
-                <ChevronRight className="w-4 h-4 text-gray-400" />
-              </button>
-              <span className="text-sm font-bold text-gray-700 px-2">{MONTHS_AR[month]} {year}</span>
-              <button onClick={nextMonth} className="w-7 h-7 rounded-xl flex items-center justify-center transition-all hover:bg-gray-100">
-                <ChevronLeft className="w-4 h-4 text-gray-400" />
-              </button>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-7 gap-1 mb-2">
-            {DAYS_AR.map((d) => (
-              <div key={d} className="text-center text-xs font-bold text-gray-400 py-1">{d}</div>
+          <h3 className="font-black text-gray-800 mb-4 flex items-center gap-2">
+            <div className="w-6 h-6 rounded-lg flex items-center justify-center bg-gradient-to-br from-rose-500 to-pink-600">
+              <Bell className="w-3.5 h-3.5 text-white" />
+            </div>
+            طلبيات تحتاج إجراء
+            {((stats?.newOrders ?? 0) + (stats?.preparingOrders ?? 0) + (stats?.shippedOrders ?? 0)) > 0 && (
+              <span className="text-xs px-2 py-0.5 rounded-full font-black text-white"
+                style={{ background: "linear-gradient(135deg,#f43f5e,#e11d48)" }}>
+                {(stats?.newOrders ?? 0) + (stats?.preparingOrders ?? 0) + (stats?.shippedOrders ?? 0)}
+              </span>
+            )}
+          </h3>
+
+          {/* أعداد الحالات */}
+          <div className="grid grid-cols-3 gap-2 mb-4">
+            {[
+              { label: "جديدة", count: stats?.newOrders ?? 0, bg: "rgba(99,102,241,0.08)", color: "#6366f1", border: "rgba(99,102,241,0.2)", href: "/admin/orders?status=NEW" },
+              { label: "تحضير", count: stats?.preparingOrders ?? 0, bg: "rgba(245,158,11,0.08)", color: "#f59e0b", border: "rgba(245,158,11,0.2)", href: "/admin/orders?status=PREPARING" },
+              { label: "شُحنت", count: stats?.shippedOrders ?? 0, bg: "rgba(139,92,246,0.08)", color: "#8b5cf6", border: "rgba(139,92,246,0.2)", href: "/admin/orders?status=SHIPPED" },
+            ].map((s) => (
+              <Link key={s.label} href={s.href}
+                className="rounded-2xl p-3 text-center transition-all hover:scale-105"
+                style={{ background: s.bg, border: `1px solid ${s.border}` }}>
+                <p className="text-2xl font-black" style={{ color: s.color }}>{s.count}</p>
+                <p className="text-xs font-semibold mt-0.5" style={{ color: s.color }}>{s.label}</p>
+              </Link>
             ))}
           </div>
-          <div className="grid grid-cols-7 gap-1">
-            {calDays.map((day, i) => {
-              const isToday = day === today.getDate() && month === today.getMonth() && year === today.getFullYear();
-              return (
-                <div key={i} className={`aspect-square flex items-center justify-center rounded-xl text-xs font-semibold transition-all duration-150 ${day ? "cursor-pointer hover:bg-violet-50" : ""}`}
-                  style={isToday ? { background: "linear-gradient(135deg,#7c3aed,#4f46e5)", color: "#fff", boxShadow: "0 4px 12px rgba(124,58,237,0.4)" } : { color: day ? "#374151" : "transparent" }}>
-                  {day ?? ""}
-                </div>
-              );
-            })}
-          </div>
 
-          <div className="mt-4 pt-4" style={{ borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-500 font-medium">طلبات اليوم</span>
-              <span className="font-black text-violet-600">{stats?.todayOrders ?? 0} طلب</span>
-            </div>
-          </div>
+          {/* قائمة الطلبيات المعلّقة */}
+          {(() => {
+            const pending = (stats?.recentOrders ?? []).filter(
+              (o) => o.status === "NEW" || o.status === "PREPARING" || o.status === "SHIPPED"
+            );
+            const totalPending = (stats?.newOrders ?? 0) + (stats?.preparingOrders ?? 0) + (stats?.shippedOrders ?? 0);
+            const NEXT: Record<string, { label: string; status: string; color: string; bg: string }> = {
+              NEW:       { label: "تأكيد ✓",  status: "PREPARING", color: "#10b981", bg: "rgba(16,185,129,0.1)" },
+              PREPARING: { label: "شحن 🚚",   status: "SHIPPED",   color: "#8b5cf6", bg: "rgba(139,92,246,0.1)" },
+              SHIPPED:   { label: "تسليم ✅", status: "DELIVERED", color: "#3b82f6", bg: "rgba(59,130,246,0.1)" },
+            };
+            if (totalPending === 0) return (
+              <div className="text-center py-6">
+                <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-2"
+                  style={{ background: "rgba(52,211,153,0.1)" }}>
+                  <CheckCircle className="w-6 h-6" style={{ color: "#34d399" }} />
+                </div>
+                <p className="text-sm font-semibold text-gray-400">كل الطلبيات تمت معالجتها ✅</p>
+              </div>
+            );
+            return (
+              <div className="space-y-2">
+                {pending.map((order) => {
+                  const next = NEXT[order.status];
+                  if (!next) return null;
+                  const productsSummary = order.items.map((i) => i.product.name).join("، ");
+                  return (
+                    <div key={order.id} className="flex items-center gap-2 p-3 rounded-2xl"
+                      style={{ background: "rgba(0,0,0,0.02)", border: "1px solid rgba(0,0,0,0.04)" }}>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-bold text-gray-800 truncate">
+                          {order.firstName} {order.lastName}
+                          <span className="text-xs font-normal text-gray-400 mr-1">• {order.wilayaName}</span>
+                        </p>
+                        <p className="text-xs text-gray-400 truncate">{productsSummary} — {formatPrice(order.total)}</p>
+                      </div>
+                      <button
+                        onClick={() => quickUpdate(order.id, next.status)}
+                        disabled={updatingId === order.id}
+                        className="flex-shrink-0 text-xs font-black px-3 py-1.5 rounded-xl transition-all disabled:opacity-50 whitespace-nowrap"
+                        style={{ background: next.bg, color: next.color, border: `1px solid ${next.color}33` }}
+                      >
+                        {updatingId === order.id ? "..." : next.label}
+                      </button>
+                    </div>
+                  );
+                })}
+                {totalPending > pending.length && (
+                  <Link href="/admin/orders"
+                    className="block text-center text-xs font-bold py-2 rounded-xl transition-colors"
+                    style={{ color: "#6b7280", background: "rgba(0,0,0,0.03)" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.06)"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(0,0,0,0.03)"; }}
+                  >
+                    + {totalPending - pending.length} طلبية أخرى — عرض الكل ←
+                  </Link>
+                )}
+              </div>
+            );
+          })()}
         </div>
       </div>
 
