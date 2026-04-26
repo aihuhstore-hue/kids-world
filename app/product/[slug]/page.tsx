@@ -9,6 +9,8 @@ import { parseProduct, formatPrice, getAgeGroupLabel } from "@/lib/utils";
 import { PRODUCT_TYPE_LABELS } from "@/types";
 import { CheckCircle, Tag, Users, Package, Star } from "lucide-react";
 
+export const revalidate = 60;
+
 interface Props {
   params: Promise<{ slug: string }>;
 }

@@ -8,6 +8,8 @@ import { parseProduct } from "@/lib/utils";
 import { AGE_GROUP_SLUG, AGE_GROUP_LABELS, AGE_GROUP_EMOJI } from "@/types";
 import SortSelect from "./SortSelect";
 
+export const revalidate = 60;
+
 interface Props {
   params: Promise<{ ageGroup: string }>;
   searchParams: Promise<{ type?: string; sort?: string }>;
