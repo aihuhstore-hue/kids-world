@@ -387,65 +387,54 @@ export default function AdminDashboard() {
               };
 
               return (
-                <div key={order.id} className="px-5 py-3.5 flex items-center gap-3 transition-colors hover:bg-gray-50">
-                  {/* الحالة */}
-                  <span className="text-xs px-2.5 py-1 rounded-full font-black flex-shrink-0"
-                    style={{ background: sc.bg, color: sc.color }}>
-                    {sc.label}
-                  </span>
-
-                  {/* المعلومات */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xs font-black text-gray-400">#{order.orderNumber}</span>
-                      <span className="text-sm font-black text-gray-800 truncate">
-                        {order.firstName} {order.lastName}
-                      </span>
-                      <span className="text-xs text-gray-400 hidden sm:inline">{order.wilayaName}</span>
-                      <span className="text-xs flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }}>
-                        {order.deliveryType === "home" ? "🏠" : "🏢"}
-                      </span>
-                    </div>
-                    {productsSummary && (
-                      <p className="text-xs text-gray-400 mt-0.5 truncate">{productsSummary}</p>
-                    )}
+                <div key={order.id} className="px-4 py-3 hover:bg-gray-50 transition-colors">
+                  {/* الصف الأول: حالة + اسم + سعر */}
+                  <div className="flex items-center gap-2 min-w-0">
+                    <span className="text-xs px-2 py-0.5 rounded-full font-black flex-shrink-0"
+                      style={{ background: sc.bg, color: sc.color }}>
+                      {sc.label}
+                    </span>
+                    <span className="text-sm font-black text-gray-800 truncate flex-1 min-w-0">
+                      {order.firstName} {order.lastName}
+                    </span>
+                    <span className="text-sm font-black text-gray-800 flex-shrink-0">
+                      {formatPrice(order.total)}
+                    </span>
                   </div>
 
-                  {/* السعر */}
-                  <span className="text-sm font-black flex-shrink-0 text-gray-800">
-                    {formatPrice(order.total)}
-                  </span>
-
-                  {/* أزرار الإجراء */}
-                  {isNew ? (
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                      <button
-                        onClick={(e) => updateStatus("PREPARING", e)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all"
-                        style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(16,185,129,0.25)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(16,185,129,0.12)"; }}
-                      >
-                        <CheckCircle className="w-3 h-3" />
-                        تأكيد
-                      </button>
-                      <button
-                        onClick={(e) => updateStatus("CANCELLED", e)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-black transition-all"
-                        style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.22)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.1)"; }}
-                      >
-                        <XCircle className="w-3 h-3" />
-                        إلغاء
-                      </button>
-                    </div>
-                  ) : (
-                    <Link href="/admin/orders"
-                      className="flex-shrink-0 w-7 h-7 rounded-xl flex items-center justify-center transition-colors hover:bg-gray-100">
-                      <ArrowLeft className="w-3.5 h-3.5 text-gray-300" />
-                    </Link>
-                  )}
+                  {/* الصف الثاني: رقم + منتجات + أزرار */}
+                  <div className="flex items-center gap-2 mt-1.5 min-w-0">
+                    <span className="text-xs text-gray-400 flex-shrink-0">#{order.orderNumber}</span>
+                    <span className="text-xs flex-shrink-0" style={{ color: "rgba(0,0,0,0.3)" }}>
+                      {order.deliveryType === "home" ? "🏠" : "🏢"}
+                    </span>
+                    <p className="text-xs text-gray-400 truncate flex-1 min-w-0">{productsSummary}</p>
+                    {isNew ? (
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button
+                          onClick={(e) => updateStatus("PREPARING", e)}
+                          className="flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-black transition-all"
+                          style={{ background: "rgba(16,185,129,0.12)", color: "#10b981", border: "1px solid rgba(16,185,129,0.25)" }}
+                        >
+                          <CheckCircle className="w-3 h-3" />
+                          تأكيد
+                        </button>
+                        <button
+                          onClick={(e) => updateStatus("CANCELLED", e)}
+                          className="flex items-center gap-0.5 px-2 py-1 rounded-lg text-xs font-black transition-all"
+                          style={{ background: "rgba(239,68,68,0.1)", color: "#ef4444", border: "1px solid rgba(239,68,68,0.2)" }}
+                        >
+                          <XCircle className="w-3 h-3" />
+                          إلغاء
+                        </button>
+                      </div>
+                    ) : (
+                      <Link href="/admin/orders"
+                        className="flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center hover:bg-gray-100 transition-colors">
+                        <ArrowLeft className="w-3 h-3 text-gray-300" />
+                      </Link>
+                    )}
+                  </div>
                 </div>
               );
             })}

@@ -148,17 +148,17 @@ export default function AdminSettings() {
 
         <div className="space-y-4">
           {/* خطوات الإعداد */}
-          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2">
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2 overflow-hidden">
             <p className="text-xs font-bold text-blue-700 mb-2">كيفية الإعداد:</p>
             {[
-              { n: "1", text: "افتح تلغرام وابحث عن", link: "@BotFather" },
-              { n: "2", text: 'أرسل /newbot واتبع التعليمات للحصول على التوكن' },
-              { n: "3", text: 'ابحث عن بوتك وأرسل له /start' },
-              { n: "4", text: 'للحصول على Chat ID افتح:', link: "api.telegram.org/bot[TOKEN]/getUpdates" },
-            ].map((s, i) => (
-              <div key={i} className="flex items-start gap-2 text-xs text-blue-800">
-                <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 font-bold flex items-center justify-center flex-shrink-0 text-xs">{s.n}</span>
-                <span>{s.text} {s.link && <code className="bg-blue-100 px-1 rounded text-blue-900">{s.link}</code>}</span>
+              "افتح تلغرام وابحث عن @BotFather",
+              "أرسل /newbot واتبع التعليمات للحصول على التوكن",
+              "ابحث عن بوتك وأرسل له /start",
+              "للحصول على Chat ID: api.telegram.org/bot{TOKEN}/getUpdates",
+            ].map((text, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs text-blue-800 min-w-0">
+                <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 font-bold flex items-center justify-center flex-shrink-0">{i + 1}</span>
+                <span className="break-words min-w-0 flex-1">{text}</span>
               </div>
             ))}
           </div>

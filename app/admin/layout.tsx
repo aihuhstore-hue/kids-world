@@ -730,7 +730,7 @@ export default function AdminLayout({
           </div>
         </header>
 
-        <div className="p-4 md:p-6 overflow-x-hidden">{children}</div>
+        <div className="p-4 md:p-6 overflow-x-hidden w-full min-w-0 max-w-full">{children}</div>
       </div>
     </div>
   );

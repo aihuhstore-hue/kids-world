@@ -65,7 +65,7 @@ export default async function RootLayout({
       dir="rtl"
       className={`${cairo.variable} ${tajawal.variable}`}
     >
-      <body className={`${cairo.className} antialiased`}>
+      <body className={`${cairo.className} antialiased overflow-x-hidden`}>
 
         {/* Facebook Pixel */}
         {fbPixel && (
