@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Eye, EyeOff, Lock, CheckCircle, Ticket } from "lucide-react";
+import { Eye, EyeOff, Lock, CheckCircle, Ticket, Send, Bot, Copy } from "lucide-react";
 import toast from "react-hot-toast";
 
 export default function AdminSettings() {
+  // ── كلمة السر ──
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -13,27 +14,78 @@ export default function AdminSettings() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
+
+  // ── إعدادات الموقع ──
   const [showPromoCode, setShowPromoCode] = useState(true);
   const [savingPromo, setSavingPromo] = useState(false);
+
+  // ── تلغرام ──
+  const [tgToken, setTgToken] = useState("");
+  const [tgChatId, setTgChatId] = useState("");
+  const [showToken, setShowToken] = useState(false);
+  const [savingTg, setSavingTg] = useState(false);
+  const [testingTg, setTestingTg] = useState(false);
 
   useEffect(() => {
     fetch("/api/settings")
       .then((r) => r.json())
       .then((data) => {
-        if (data.showPromoCode !== undefined) {
-          setShowPromoCode(data.showPromoCode === "true");
-        }
+        if (data.showPromoCode !== undefined) setShowPromoCode(data.showPromoCode === "true");
+        if (data.telegram_bot_token) setTgToken(data.telegram_bot_token);
+        if (data.telegram_chat_id) setTgChatId(data.telegram_chat_id);
       });
   }, []);
+
+  const pw = () => sessionStorage.getItem("admin-password") ?? "";
+
+  // حفظ تلغرام
+  const handleSaveTg = async () => {
+    if (!tgToken.trim() || !tgChatId.trim()) {
+      toast.error("أدخل التوكن والـ Chat ID");
+      return;
+    }
+    setSavingTg(true);
+    try {
+      const res = await fetch("/api/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-admin-password": pw() },
+        body: JSON.stringify({ telegram_bot_token: tgToken.trim(), telegram_chat_id: tgChatId.trim() }),
+      });
+      if (res.ok) toast.success("تم حفظ إعدادات تلغرام ✅");
+      else toast.error("فشل الحفظ");
+    } catch {
+      toast.error("خطأ في الاتصال");
+    } finally {
+      setSavingTg(false);
+    }
+  };
+
+  // اختبار تلغرام
+  const handleTestTg = async () => {
+    setTestingTg(true);
+    try {
+      const res = await fetch("/api/telegram/test", {
+        method: "POST",
+        headers: { "x-admin-password": pw() },
+      });
+      const data = await res.json();
+      if (data.ok) toast.success("✅ وصل الإشعار على تلغرام!");
+      else if (data.error === "no_config") toast.error("احفظ البيانات أولاً");
+      else toast.error("خطأ: " + (data.error ?? "غير معروف"));
+    } catch {
+      toast.error("خطأ في الاتصال");
+    } finally {
+      setTestingTg(false);
+    }
+  };
 
   const handleTogglePromo = async (val: boolean) => {
     setShowPromoCode(val);
     setSavingPromo(true);
-    const password = sessionStorage.getItem("admin-password") ?? "";
     try {
       await fetch("/api/settings", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "x-admin-password": password },
+        headers: { "Content-Type": "application/json", "x-admin-password": pw() },
         body: JSON.stringify({ showPromoCode: String(val) }),
       });
       toast.success(val ? "تم تفعيل كود الخصم ✅" : "تم إخفاء كود الخصم ✅");
@@ -81,7 +133,123 @@ export default function AdminSettings() {
 
   return (
     <div className="max-w-md space-y-5">
-      {/* إعدادات الموقع */}
+
+      {/* ── بوت تلغرام ── */}
+      <div className="bg-white rounded-2xl shadow-sm p-6">
+        <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "linear-gradient(135deg,#0088cc,#005f99)" }}>
+            <Bot className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="font-bold text-gray-800">بوت تلغرام</h2>
+            <p className="text-sm text-gray-400">إشعارات الطلبيات + استرجاع كلمة السر</p>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          {/* خطوات الإعداد */}
+          <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 space-y-2">
+            <p className="text-xs font-bold text-blue-700 mb-2">كيفية الإعداد:</p>
+            {[
+              { n: "1", text: "افتح تلغرام وابحث عن", link: "@BotFather" },
+              { n: "2", text: 'أرسل /newbot واتبع التعليمات للحصول على التوكن' },
+              { n: "3", text: 'ابحث عن بوتك وأرسل له /start' },
+              { n: "4", text: 'للحصول على Chat ID افتح:', link: "api.telegram.org/bot[TOKEN]/getUpdates" },
+            ].map((s, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs text-blue-800">
+                <span className="w-5 h-5 rounded-full bg-blue-200 text-blue-700 font-bold flex items-center justify-center flex-shrink-0 text-xs">{s.n}</span>
+                <span>{s.text} {s.link && <code className="bg-blue-100 px-1 rounded text-blue-900">{s.link}</code>}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* التوكن */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Bot Token
+            </label>
+            <div className="relative">
+              <input
+                type={showToken ? "text" : "password"}
+                value={tgToken}
+                onChange={(e) => setTgToken(e.target.value)}
+                placeholder="123456789:AAF..."
+                className="input-field pl-16 font-mono text-sm"
+                dir="ltr"
+              />
+              <div className="absolute left-2 top-1/2 -translate-y-1/2 flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => setShowToken(!showToken)}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  {showToken ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                </button>
+                {tgToken && (
+                  <button
+                    type="button"
+                    onClick={() => { navigator.clipboard.writeText(tgToken); toast.success("تم النسخ"); }}
+                    className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Chat ID */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1.5">
+              Chat ID
+            </label>
+            <input
+              type="text"
+              value={tgChatId}
+              onChange={(e) => setTgChatId(e.target.value)}
+              placeholder="123456789"
+              className="input-field font-mono text-sm"
+              dir="ltr"
+            />
+          </div>
+
+          {/* ما يفعله البوت */}
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-gray-50 rounded-xl p-3 text-center">
+              <p className="text-lg mb-1">🛒</p>
+              <p className="text-xs font-semibold text-gray-700">إشعار طلبية جديدة</p>
+              <p className="text-xs text-gray-400">تلقائي عند كل طلب</p>
+            </div>
+            <div className="bg-gray-50 rounded-xl p-3 text-center">
+              <p className="text-lg mb-1">🔐</p>
+              <p className="text-xs font-semibold text-gray-700">كود استرجاع السر</p>
+              <p className="text-xs text-gray-400">عند نسيان كلمة السر</p>
+            </div>
+          </div>
+
+          {/* أزرار */}
+          <div className="flex gap-2 pt-1">
+            <button
+              onClick={handleSaveTg}
+              disabled={savingTg}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white transition-colors disabled:opacity-50"
+              style={{ background: "linear-gradient(135deg,#0088cc,#005f99)" }}
+            >
+              {savingTg ? "جاري الحفظ..." : "حفظ"}
+            </button>
+            <button
+              onClick={handleTestTg}
+              disabled={testingTg || !tgToken || !tgChatId}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-40"
+            >
+              <Send className="w-4 h-4" />
+              {testingTg ? "جاري الإرسال..." : "اختبار"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ── إعدادات الموقع ── */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-5 pb-4 border-b border-gray-100">
           <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center">
@@ -108,16 +276,12 @@ export default function AdminSettings() {
               showPromoCode ? "bg-green-500" : "bg-gray-300"
             } ${savingPromo ? "opacity-50" : ""}`}
           >
-            <div
-              className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${
-                showPromoCode ? "right-1" : "left-1"
-              }`}
-            />
+            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all ${showPromoCode ? "right-1" : "left-1"}`} />
           </button>
         </div>
       </div>
 
-      {/* تغيير كلمة السر */}
+      {/* ── تغيير كلمة السر ── */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-gray-100">
           <div className="w-10 h-10 bg-yellow-100 rounded-xl flex items-center justify-center">
@@ -137,82 +301,42 @@ export default function AdminSettings() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              كلمة السر الحالية <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showCurrent ? "text" : "password"}
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-                placeholder="أدخل كلمة السر الحالية"
-                className="input-field pl-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowCurrent(!showCurrent)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
+          {[
+            { label: "كلمة السر الحالية", val: currentPassword, set: setCurrentPassword, show: showCurrent, setShow: setShowCurrent },
+            { label: "كلمة السر الجديدة", val: newPassword, set: setNewPassword, show: showNew, setShow: setShowNew },
+            { label: "تأكيد كلمة السر الجديدة", val: confirmPassword, set: setConfirmPassword, show: showConfirm, setShow: setShowConfirm },
+          ].map((f, i) => (
+            <div key={i}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {f.label} <span className="text-red-500">*</span>
+              </label>
+              <div className="relative">
+                <input
+                  type={f.show ? "text" : "password"}
+                  value={f.val}
+                  onChange={(e) => f.set(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  className={`input-field pl-10 ${
+                    i === 2 && f.val && f.val !== newPassword ? "input-error" : ""
+                  }`}
+                />
+                <button
+                  type="button"
+                  onClick={() => f.setShow(!f.show)}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  {f.show ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              {i === 1 && f.val.length > 0 && f.val.length < 4 && (
+                <p className="text-red-500 text-xs mt-1">يجب أن تكون 4 أحرف على الأقل</p>
+              )}
+              {i === 2 && f.val && f.val !== newPassword && (
+                <p className="text-red-500 text-xs mt-1">كلمتا السر غير متطابقتين</p>
+              )}
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              كلمة السر الجديدة <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showNew ? "text" : "password"}
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-                placeholder="أدخل كلمة السر الجديدة"
-                className="input-field pl-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowNew(!showNew)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {newPassword.length > 0 && newPassword.length < 4 && (
-              <p className="text-red-500 text-xs mt-1">يجب أن تكون 4 أحرف على الأقل</p>
-            )}
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              تأكيد كلمة السر الجديدة <span className="text-red-500">*</span>
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirm ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                placeholder="أعد كتابة كلمة السر الجديدة"
-                className={`input-field pl-10 ${
-                  confirmPassword && confirmPassword !== newPassword ? "input-error" : ""
-                }`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-            {confirmPassword && confirmPassword !== newPassword && (
-              <p className="text-red-500 text-xs mt-1">كلمتا السر غير متطابقتين</p>
-            )}
-          </div>
+          ))}
 
           <button
             type="submit"
