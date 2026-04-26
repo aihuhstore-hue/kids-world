@@ -36,7 +36,7 @@ function urlBase64ToUint8Array(base64: string): ArrayBuffer {
 const navLinks = [
   { href: "/admin", label: "لوحة التحكم", icon: LayoutDashboard },
   { href: "/admin/products", label: "المنتجات", icon: Package },
-  { href: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
+  { href: "/admin/orders", label: "الطلبيات", icon: ShoppingBag },
   { href: "/admin/promo", label: "أكواد الخصم", icon: Ticket },
   { href: "/admin/success-page", label: "صفحة الشكر", icon: CheckCircle },
   { href: "/admin/integrations", label: "ربط المنصات", icon: Zap },

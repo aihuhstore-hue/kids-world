@@ -150,6 +150,12 @@ export default function ProductForm({
       return;
     }
 
+    if (!form.price || parseFloat(form.price) <= 0) {
+      toast.error("يرجى إدخال سعر المنتج");
+      setActiveTab("pricing");
+      return;
+    }
+
     setLoading(true);
     const password = sessionStorage.getItem("admin-password") ?? "";
 
