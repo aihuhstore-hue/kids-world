@@ -206,11 +206,11 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
 
         {/* Gender Selection */}
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
-            جنس الطفل <span className="text-red-500">*</span>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            نوع الجنس <span className="text-red-500">*</span>
           </label>
-          <div className="flex gap-6 justify-center">
-            <label className="flex flex-col items-center gap-2 cursor-pointer">
+          <div className="flex items-center gap-3">
+            <label className="flex flex-col items-center gap-1 cursor-pointer">
               <input
                 type="radio"
                 {...register("gender")}
@@ -218,24 +218,20 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
                 className="hidden"
               />
               <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-all duration-200 border-4 ${
+                className={`w-11 h-11 rounded-full flex items-center justify-center text-xl transition-all duration-200 border-2 ${
                   watchedGender === "girl"
-                    ? "border-pink-400 bg-pink-100 shadow-lg scale-110 ring-4 ring-pink-200"
-                    : "border-pink-200 bg-pink-50 hover:border-pink-300 hover:scale-105"
+                    ? "border-pink-400 bg-pink-100 shadow-md scale-110"
+                    : "border-pink-200 bg-pink-50 hover:border-pink-300"
                 }`}
               >
                 👧
               </div>
-              <span
-                className={`text-sm font-bold transition-colors ${
-                  watchedGender === "girl" ? "text-pink-600" : "text-gray-500"
-                }`}
-              >
+              <span className={`text-xs font-semibold ${watchedGender === "girl" ? "text-pink-600" : "text-gray-400"}`}>
                 بنت
               </span>
             </label>
 
-            <label className="flex flex-col items-center gap-2 cursor-pointer">
+            <label className="flex flex-col items-center gap-1 cursor-pointer">
               <input
                 type="radio"
                 {...register("gender")}
@@ -243,27 +239,21 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
                 className="hidden"
               />
               <div
-                className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-all duration-200 border-4 ${
+                className={`w-11 h-11 rounded-full flex items-center justify-center text-xl transition-all duration-200 border-2 ${
                   watchedGender === "boy"
-                    ? "border-blue-400 bg-blue-100 shadow-lg scale-110 ring-4 ring-blue-200"
-                    : "border-blue-200 bg-blue-50 hover:border-blue-300 hover:scale-105"
+                    ? "border-blue-400 bg-blue-100 shadow-md scale-110"
+                    : "border-blue-200 bg-blue-50 hover:border-blue-300"
                 }`}
               >
                 👦
               </div>
-              <span
-                className={`text-sm font-bold transition-colors ${
-                  watchedGender === "boy" ? "text-blue-600" : "text-gray-500"
-                }`}
-              >
+              <span className={`text-xs font-semibold ${watchedGender === "boy" ? "text-blue-600" : "text-gray-400"}`}>
                 ولد
               </span>
             </label>
           </div>
           {errors.gender && (
-            <p className="text-red-500 text-xs mt-2 text-center">
-              {errors.gender.message}
-            </p>
+            <p className="text-red-500 text-xs mt-1">{errors.gender.message}</p>
           )}
         </div>
 
