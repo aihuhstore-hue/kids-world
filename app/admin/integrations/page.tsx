@@ -272,6 +272,32 @@ export default function IntegrationsPage() {
               {saving === integration.id ? "جاري الحفظ..." : saved[integration.id] ? "تم الحفظ!" : "حفظ"}
             </button>
 
+            {/* اختبار Facebook CAPI */}
+            {integration.id === "facebook" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    const password = sessionStorage.getItem("admin-password") ?? "";
+                    const res = await fetch("/api/facebook/test", {
+                      method: "POST",
+                      headers: { "x-admin-password": password },
+                    });
+                    const d = await res.json();
+                    if (d.error === "no_config") { toast.error("احفظ Pixel ID و Token أولاً"); return; }
+                    if (d.fb_response?.events_received > 0) {
+                      toast.success("✅ Purchase وصل لـ Meta! تحقق من Test Events");
+                    } else {
+                      toast.error("❌ خطأ: " + JSON.stringify(d.fb_response?.error ?? d.fb_response));
+                    }
+                  } catch (e) { toast.error("خطأ: " + String(e)); }
+                }}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 transition-colors"
+              >
+                📘 اختبار Facebook CAPI
+              </button>
+            )}
+
             {/* تعليمات Telegram */}
             {integration.id === "telegram" && (
               <div className="mt-3 space-y-3">
