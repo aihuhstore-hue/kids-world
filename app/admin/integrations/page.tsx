@@ -22,6 +22,7 @@ const INTEGRATIONS = [
     fields: [
       { key: "fb_pixel_id", label: "Pixel ID", placeholder: "123456789012345", hint: "من Meta Events Manager" },
       { key: "fb_access_token", label: "Conversions API Token", placeholder: "EAAxxxxxxxxx...", secret: true, hint: "من Meta Business → Conversions API" },
+      { key: "fb_test_code", label: "Test Event Code (اختياري)", placeholder: "TEST272", hint: "من Test Events tab — احذفه بعد التأكد من عمل البكسل" },
     ] as IntegrationField[],
   },
   {

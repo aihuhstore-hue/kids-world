@@ -98,27 +98,37 @@ async function sendSheets(webhookUrl: string, orderNumber: string, data: OrderDa
   });
 }
 
+// ── هاش SHA-256 ──
+async function sha256(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(text.trim().toLowerCase()));
+  return Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
 // ── إرسال Facebook Conversions ──
-async function sendFacebook(pixelId: string, token: string, orderNumber: string, data: OrderData) {
+async function sendFacebook(pixelId: string, token: string, testCode: string, orderNumber: string, data: OrderData) {
   if (!pixelId || !token) return;
-  await fetch(`https://graph.facebook.com/v18.0/${pixelId}/events?access_token=${token}`, {
+  const hashedPhone = await sha256(data.phone);
+  const payload: Record<string, unknown> = {
+    data: [{
+      event_name: "Purchase",
+      event_time: Math.floor(Date.now() / 1000),
+      action_source: "website",
+      user_data: { ph: [hashedPhone] },
+      custom_data: {
+        currency: "DZD",
+        value: data.total,
+        order_id: orderNumber,
+        num_items: data.items.reduce((s, i) => s + i.quantity, 0),
+      },
+    }],
+  };
+  if (testCode) payload.test_event_code = testCode;
+  const res = await fetch(`https://graph.facebook.com/v21.0/${pixelId}/events?access_token=${token}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      data: [{
-        event_name: "Purchase",
-        event_time: Math.floor(Date.now() / 1000),
-        action_source: "website",
-        user_data: { ph: [data.phone] },
-        custom_data: {
-          currency: "DZD",
-          value: data.total,
-          order_id: orderNumber,
-          num_items: data.items.reduce((s, i) => s + i.quantity, 0),
-        },
-      }],
-    }),
+    body: JSON.stringify(payload),
   });
+  if (!res.ok) console.error("FB CAPI error:", await res.text());
 }
 
 // ── إرسال Push Notifications ──
@@ -174,7 +184,7 @@ export async function POST(req: NextRequest) {
             in: [
               "telegram_bot_token", "telegram_chat_id",
               "google_sheets_webhook",
-              "fb_pixel_id", "fb_access_token",
+              "fb_pixel_id", "fb_access_token", "fb_test_code",
               "vapid_public_key", "vapid_private_key", "push_subscriptions",
             ],
           },
@@ -245,7 +255,7 @@ export async function POST(req: NextRequest) {
     Promise.allSettled([
       sendTelegram(s("telegram_bot_token"), s("telegram_chat_id"), orderNumber, data, productMap),
       sendSheets(s("google_sheets_webhook"), orderNumber, data),
-      sendFacebook(s("fb_pixel_id"), s("fb_access_token"), orderNumber, data),
+      sendFacebook(s("fb_pixel_id"), s("fb_access_token"), s("fb_test_code"), orderNumber, data),
       sendPush(s("vapid_public_key"), s("vapid_private_key"), s("push_subscriptions"), orderNumber, data),
     ]).catch(() => {});
 
