@@ -4,6 +4,7 @@ import { CheckCircle, Package, Phone, Home } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { prisma } from "@/lib/prisma";
+import FbPurchaseEvent from "@/components/product/FbPurchaseEvent";
 
 interface Props {
   searchParams: Promise<{ orderNumber?: string }>;
@@ -12,9 +13,16 @@ interface Props {
 export default async function OrderSuccessPage({ searchParams }: Props) {
   const { orderNumber = "ORD-XXXXX" } = await searchParams;
 
-  const settings = await prisma.setting.findMany({
-    where: { key: { in: ["success_title", "success_message", "success_image", "success_show_steps", "success_step1", "success_step2", "success_step3"] } }
-  });
+  const [settings, order] = await Promise.all([
+    prisma.setting.findMany({
+      where: { key: { in: ["success_title", "success_message", "success_image", "success_show_steps", "success_step1", "success_step2", "success_step3"] } }
+    }),
+    prisma.order.findUnique({
+      where: { orderNumber },
+      select: { total: true },
+    }),
+  ]);
+
   const s: Record<string, string> = {};
   for (const row of settings) s[row.key] = row.value;
 
@@ -28,6 +36,7 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
 
   return (
     <>
+      {order && <FbPurchaseEvent value={order.total} />}
       <Header />
       <main className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center">
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
