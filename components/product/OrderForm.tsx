@@ -63,6 +63,7 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
 
   const watchedWilaya = watch("wilayaCode");
   const watchedDeliveryType = watch("deliveryType");
+  const watchedGender = watch("gender");
 
   useEffect(() => {
     if (watchedWilaya) {
@@ -137,6 +138,7 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
+          gender: data.gender,
           wilayaName: wilaya?.name ?? data.wilayaCode,
           items: [{ productId: product.id, quantity, price: product.price }],
           subtotal,
@@ -200,6 +202,69 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
             </button>
             <span className="text-xs text-gray-400">(الحد الأقصى 10)</span>
           </div>
+        </div>
+
+        {/* Gender Selection */}
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3 text-center">
+            جنس الطفل <span className="text-red-500">*</span>
+          </label>
+          <div className="flex gap-6 justify-center">
+            <label className="flex flex-col items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                {...register("gender")}
+                value="girl"
+                className="hidden"
+              />
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-all duration-200 border-4 ${
+                  watchedGender === "girl"
+                    ? "border-pink-400 bg-pink-100 shadow-lg scale-110 ring-4 ring-pink-200"
+                    : "border-pink-200 bg-pink-50 hover:border-pink-300 hover:scale-105"
+                }`}
+              >
+                👧
+              </div>
+              <span
+                className={`text-sm font-bold transition-colors ${
+                  watchedGender === "girl" ? "text-pink-600" : "text-gray-500"
+                }`}
+              >
+                بنت
+              </span>
+            </label>
+
+            <label className="flex flex-col items-center gap-2 cursor-pointer">
+              <input
+                type="radio"
+                {...register("gender")}
+                value="boy"
+                className="hidden"
+              />
+              <div
+                className={`w-20 h-20 rounded-full flex items-center justify-center text-4xl transition-all duration-200 border-4 ${
+                  watchedGender === "boy"
+                    ? "border-blue-400 bg-blue-100 shadow-lg scale-110 ring-4 ring-blue-200"
+                    : "border-blue-200 bg-blue-50 hover:border-blue-300 hover:scale-105"
+                }`}
+              >
+                👦
+              </div>
+              <span
+                className={`text-sm font-bold transition-colors ${
+                  watchedGender === "boy" ? "text-blue-600" : "text-gray-500"
+                }`}
+              >
+                ولد
+              </span>
+            </label>
+          </div>
+          {errors.gender && (
+            <p className="text-red-500 text-xs mt-2 text-center">
+              {errors.gender.message}
+            </p>
+          )}
         </div>
 
         {/* Name Row */}

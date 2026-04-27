@@ -41,6 +41,7 @@ model Order {
   deliveryType String
   address      String
   notes        String?
+  gender       String?
   subtotal     Float
   discount     Float       @default(0)
   deliveryFee  Float

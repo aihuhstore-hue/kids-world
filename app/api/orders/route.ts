@@ -15,6 +15,7 @@ const createOrderSchema = z.object({
   deliveryType: z.enum(["home", "office"]),
   address: z.string().optional().default(""),
   notes: z.string().optional(),
+  gender: z.enum(["girl", "boy"]).optional(),
   items: z.array(
     z.object({
       productId: z.string(),
@@ -50,6 +51,7 @@ async function sendTelegram(
     `───────────────`,
     `👤 <b>${esc(data.firstName)} ${esc(data.lastName)}</b>`,
     `📱 ${esc(data.phone)}`,
+    data.gender ? `${data.gender === "girl" ? "👧 بنت" : "👦 ولد"}` : "",
     `📍 ${esc(data.wilayaName)}${data.commune ? " — " + esc(data.commune) : ""}`,
     deliveryLabel,
     data.notes ? `📝 ${esc(data.notes)}` : "",
@@ -204,6 +206,7 @@ export async function POST(req: NextRequest) {
           deliveryType: data.deliveryType,
           address: data.address,
           notes: data.notes,
+          gender: data.gender ?? null,
           subtotal: data.subtotal,
           discount: data.discount ?? 0,
           deliveryFee: data.deliveryFee,

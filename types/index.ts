@@ -116,6 +116,7 @@ export interface Order {
   deliveryType: string;
   address: string;
   notes?: string | null;
+  gender?: string | null;
   subtotal: number;
   discount: number;
   deliveryFee: number;
@@ -182,6 +183,10 @@ export const orderFormSchema = z.object({
   }),
   address: z.string().optional().default(""),
   notes: z.string().optional(),
+  gender: z.enum(["girl", "boy"], {
+    required_error: "يرجى اختيار جنس الطفل",
+    invalid_type_error: "يرجى اختيار جنس الطفل",
+  }),
 }).superRefine((data, ctx) => {
   if (data.deliveryType === "home" && (!data.address || data.address.trim().length < 5)) {
     ctx.addIssue({
