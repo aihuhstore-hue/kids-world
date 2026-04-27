@@ -95,12 +95,17 @@ export default function ProductForm({
   const update = (key: keyof ProductFormData, value: string | boolean) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
-  const generateSlug = (name: string) =>
-    name
-      .toLowerCase()
+  const generateSlug = (name: string) => {
+    const base = name
+      .trim()
       .replace(/\s+/g, "-")
-      .replace(/[^\w-]/g, "")
-      .slice(0, 60);
+      .replace(/[^\w؀-ۿ-]/gi, "")
+      .replace(/-{2,}/g, "-")
+      .replace(/^-|-$/g, "")
+      .toLowerCase()
+      .slice(0, 55);
+    return base || `product-${Date.now().toString(36)}`;
+  };
 
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;

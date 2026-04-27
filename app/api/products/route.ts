@@ -3,6 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { isAdminAuthorized } from "@/lib/admin-auth";
 import { z } from "zod";
 
+async function resolveUniqueSlug(base: string): Promise<string> {
+  const slug = base || `product-${Date.now().toString(36)}`;
+  const existing = await prisma.product.findUnique({ where: { slug } });
+  if (!existing) return slug;
+  return `${slug}-${Date.now().toString(36).slice(-4)}`;
+}
+
 const productSchema = z.object({
   name: z.string().min(1),
   slug: z.string().min(1),
@@ -57,9 +64,12 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = productSchema.parse(body);
 
+    const uniqueSlug = await resolveUniqueSlug(data.slug);
+
     const product = await prisma.product.create({
       data: {
         ...data,
+        slug: uniqueSlug,
         features: JSON.stringify(data.features),
         images: JSON.stringify(data.images),
       },
@@ -69,10 +79,6 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.errors[0]?.message ?? "بيانات غير صحيحة" }, { status: 400 });
-    }
-    const msg = (err as { message?: string }).message ?? "";
-    if (msg.includes("Unique constraint")) {
-      return NextResponse.json({ error: "هذا الـ slug موجود مسبقاً" }, { status: 409 });
     }
     return NextResponse.json({ error: "خطأ في الخادم" }, { status: 500 });
   }
