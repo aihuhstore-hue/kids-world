@@ -172,7 +172,7 @@ export default function OrderForm({ product, quantity: initialQuantity = 1 }: Or
           📝 أكمل طلبك الآن
         </h2>
         <p className="text-gray-800 text-sm mt-0.5">
-          الدفع عند الاستلام — لا تدفع الآن
+          الدفع عند الاستلام
         </p>
       </div>
 
