@@ -17,8 +17,9 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
   const product = await prisma.product.findUnique({
-    where: { slug },
+    where: { slug: decodedSlug },
   });
   if (!product) return {};
   return {
@@ -34,8 +35,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
+  const decodedSlug = decodeURIComponent(slug);
   const rawProduct = await prisma.product.findUnique({
-    where: { slug, isActive: true },
+    where: { slug: decodedSlug, isActive: true },
   });
 
   if (!rawProduct) notFound();
