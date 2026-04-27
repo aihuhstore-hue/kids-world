@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { parseProduct, formatPrice, getAgeGroupLabel } from "@/lib/utils";
 import { PRODUCT_TYPE_LABELS } from "@/types";
 import { CheckCircle, Tag, Users, Package, Star } from "lucide-react";
+import FloatingOrderButton from "@/components/product/FloatingOrderButton";
 
 export const revalidate = 60;
 
@@ -147,7 +148,7 @@ export default async function ProductPage({ params }: Props) {
             </div>
 
             {/* Right: Order Form */}
-            <div className="lg:sticky lg:top-20 lg:self-start">
+            <div id="order-form-section" className="lg:sticky lg:top-20 lg:self-start">
               <OrderForm product={product} />
 
               {/* Trust badges */}
@@ -175,6 +176,7 @@ export default async function ProductPage({ params }: Props) {
           </div>
         </div>
       </main>
+      <FloatingOrderButton />
       <Footer />
     </>
   );
