@@ -4,6 +4,7 @@ import { useEffect } from "react";
 
 interface Props {
   value: number;
+  eventId: string;
   currency?: string;
 }
 
@@ -13,12 +14,12 @@ declare global {
   }
 }
 
-export default function FbPurchaseEvent({ value, currency = "DZD" }: Props) {
+export default function FbPurchaseEvent({ value, eventId, currency = "DZD" }: Props) {
   useEffect(() => {
     if (typeof window !== "undefined" && window.fbq) {
-      window.fbq("track", "Purchase", { value, currency });
+      window.fbq("track", "Purchase", { value, currency }, { eventID: eventId });
     }
-  }, [value, currency]);
+  }, [value, currency, eventId]);
 
   return null;
 }

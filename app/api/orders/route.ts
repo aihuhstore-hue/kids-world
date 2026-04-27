@@ -111,6 +111,7 @@ async function sendFacebook(pixelId: string, token: string, testCode: string, or
   const payload: Record<string, unknown> = {
     data: [{
       event_name: "Purchase",
+      event_id: orderNumber,
       event_time: Math.floor(Date.now() / 1000),
       action_source: "website",
       user_data: { ph: [hashedPhone] },

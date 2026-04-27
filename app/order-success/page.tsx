@@ -36,7 +36,7 @@ export default async function OrderSuccessPage({ searchParams }: Props) {
 
   return (
     <>
-      {order && <FbPurchaseEvent value={order.total} />}
+      {order && <FbPurchaseEvent value={order.total} eventId={orderNumber} />}
       <Header />
       <main className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 flex items-center">
         <div className="max-w-lg mx-auto px-4 py-16 text-center">
