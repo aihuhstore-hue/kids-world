@@ -548,8 +548,8 @@ export default function AdminLayout({
     <div className="min-h-screen flex" dir="rtl" style={{ background: "#0f1117" }}>
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 right-0 w-64 z-40 flex flex-col transition-transform duration-300 ease-in-out ${
-        sidebarOpen ? "translate-x-0" : "translate-x-full md:translate-x-0"
+      <aside className={`fixed inset-y-0 right-0 w-64 z-40 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        sidebarOpen ? "translate-x-0" : "translate-x-full"
       }`}
         style={{
           background: "linear-gradient(180deg, #13151f 0%, #0d0f18 100%)",
@@ -633,47 +633,29 @@ export default function AdminLayout({
 
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 z-30 md:hidden" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+        <div className="fixed inset-0 z-30 lg:hidden" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
           onClick={() => setSidebarOpen(false)} />
       )}
 
       {/* المحتوى */}
       <div
-        className={`flex-1 md:mr-64 flex flex-col min-h-screen transition-colors duration-300 admin-area ${isDark ? "admin-dark" : ""}`}
+        className={`flex-1 flex flex-col min-h-screen transition-colors duration-300 admin-area lg:mr-64 ${isDark ? "admin-dark" : ""}`}
         style={{ background: isDark ? "#0d0f18" : "#f1f3f9", colorScheme: isDark ? "dark" : "light" }}
       >
 
-        {/* Header */}
-        <header className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3 transition-all duration-300"
+        {/* Header - dir="ltr" لضمان ظهور زر القائمة دائماً على اليمين */}
+        <header
+          dir="ltr"
+          className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3 transition-all duration-300"
           style={{
             background: isDark ? "rgba(13,15,24,0.95)" : "rgba(255,255,255,0.9)",
             backdropFilter: "blur(12px)",
             borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
             boxShadow: isDark ? "0 1px 12px rgba(0,0,0,0.4)" : "0 1px 12px rgba(0,0,0,0.06)",
           }}>
-          {/* زر القائمة على اليمين */}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="md:hidden flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200"
-            style={{ background: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)", zIndex: 30, position: "relative" }}
-          >
-            {sidebarOpen ? <X className="w-5 h-5" style={{ color: isDark ? "#e2e8f0" : "#374151" }} /> : <Menu className="w-5 h-5" style={{ color: isDark ? "#e2e8f0" : "#374151" }} />}
-          </button>
 
-          <div className="flex items-center gap-2 min-w-0 flex-1">
-            {(() => {
-              const active = navLinks.find((l) => l.href === pathname || (l.href !== "/admin" && pathname.startsWith(l.href)));
-              const gradient = active ? (navColors[active.href] ?? "from-violet-500 to-purple-600") : "from-violet-500 to-purple-600";
-              return active ? (
-                <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center bg-gradient-to-br ${gradient}`}>
-                  <active.icon className="w-3.5 h-3.5 text-white" />
-                </div>
-              ) : null;
-            })()}
-            <h1 className="font-black text-base truncate" style={{ color: isDark ? "#f1f5f9" : "#1f2937" }}>{activeLabel}</h1>
-          </div>
-
-          <div className="mr-auto flex-shrink-0 flex items-center gap-2">
-            {/* زر الإشعارات */}
+          {/* LEFT: أيقونات الإشعارات والوضع الليلي */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             {pushStatus !== "unsupported" && (
               pushStatus === "granted" ? (
                 <button
@@ -700,8 +682,6 @@ export default function AdminLayout({
                 </button>
               )
             )}
-
-            {/* زر الوضع الليلي */}
             <button
               onClick={toggleDark}
               title={isDark ? "الوضع النهاري" : "الوضع الليلي"}
@@ -713,21 +693,45 @@ export default function AdminLayout({
               onMouseEnter={(e) => { e.currentTarget.style.transform = "scale(1.1)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = "scale(1)"; }}
             >
-              {isDark
-                ? <Sun className="w-4 h-4 text-yellow-400" />
-                : <Moon className="w-4 h-4 text-gray-500" />
-              }
+              {isDark ? <Sun className="w-4 h-4 text-yellow-400" /> : <Moon className="w-4 h-4 text-gray-500" />}
             </button>
-
-            <Link href="/" className="hidden sm:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200"
+            <Link href="/" className="hidden lg:flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-xl transition-all duration-200"
               style={{ color: isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)", background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}
               onMouseEnter={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"; e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.7)" : "rgba(0,0,0,0.7)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)"; e.currentTarget.style.color = isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"; }}
             >
-              عرض الموقع
-              <span style={{ fontSize: "10px" }}>←</span>
+              عرض الموقع <span style={{ fontSize: "10px" }}>←</span>
             </Link>
           </div>
+
+          {/* CENTER: عنوان الصفحة */}
+          <div className="flex-1 min-w-0 flex items-center justify-end gap-2" dir="rtl">
+            {(() => {
+              const active = navLinks.find((l) => l.href === pathname || (l.href !== "/admin" && pathname.startsWith(l.href)));
+              const gradient = active ? (navColors[active.href] ?? "from-violet-500 to-purple-600") : "from-violet-500 to-purple-600";
+              return active ? (
+                <div className={`w-7 h-7 rounded-lg flex-shrink-0 flex items-center justify-center bg-gradient-to-br ${gradient}`}>
+                  <active.icon className="w-3.5 h-3.5 text-white" />
+                </div>
+              ) : null;
+            })()}
+            <h1 className="font-black text-base truncate" style={{ color: isDark ? "#f1f5f9" : "#1f2937" }}>{activeLabel}</h1>
+          </div>
+
+          {/* RIGHT: زر القائمة - يظهر فقط على الهاتف عبر CSS */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-xl transition-all duration-200 lg:hidden"
+            style={{
+              background: isDark ? "rgba(255,255,255,0.15)" : "#f3f4f6",
+              border: isDark ? "1.5px solid rgba(255,255,255,0.2)" : "1.5px solid #d1d5db",
+            }}
+          >
+            {sidebarOpen
+              ? <X className="w-5 h-5" style={{ color: isDark ? "#e2e8f0" : "#111827" }} />
+              : <Menu className="w-5 h-5" style={{ color: isDark ? "#e2e8f0" : "#111827" }} />
+            }
+          </button>
         </header>
 
         <div className="p-4 md:p-6 overflow-x-hidden w-full min-w-0 max-w-full">{children}</div>

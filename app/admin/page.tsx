@@ -151,7 +151,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         {[1,2,3,4].map(i => <div key={i} className="rounded-3xl h-28 bg-gray-200" />)}
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         <div className="rounded-3xl h-56 bg-gray-200" />
         <div className="rounded-3xl h-56 bg-gray-200" />
       </div>
@@ -181,7 +181,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* الإيرادات الرئيسية */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {[
           { label: "إيرادات الشهر", withDelivery: stats?.monthRevenue ?? 0, noDelivery: stats?.monthRevenueNoDelivery ?? 0, sub: growthVsLastMonth >= 0 ? `↑ ${growthVsLastMonth}% عن الشهر الماضي` : `↓ ${Math.abs(growthVsLastMonth)}% عن الشهر الماضي`, subColor: growthVsLastMonth >= 0 ? "#34d399" : "#f87171", gradient: "from-emerald-500 to-teal-500", glow: "rgba(16,185,129,0.3)" },
           { label: "إيرادات الأسبوع", withDelivery: stats?.weekRevenue ?? 0, noDelivery: stats?.weekRevenueNoDelivery ?? 0, sub: `من ${stats?.weekOrders ?? 0} طلب`, subColor: "#60a5fa", gradient: "from-blue-500 to-cyan-500", glow: "rgba(59,130,246,0.3)" },
@@ -208,7 +208,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* إحصائيات الطلبات */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[
           { label: "اليوم", value: stats?.todayOrders ?? "—", sub: `أمس: ${stats?.yesterdayOrders ?? 0}`, icon: Clock, gradient: "from-amber-500 to-orange-500", glow: "rgba(245,158,11,0.3)", extra: growthVsYesterday !== 0 ? (growthVsYesterday > 0 ? `↑${growthVsYesterday}%` : `↓${Math.abs(growthVsYesterday)}%`) : "—", extraColor: growthVsYesterday >= 0 ? "#34d399" : "#f87171" },
           { label: "هذا الأسبوع", value: stats?.weekOrders ?? "—", sub: "آخر 7 أيام", icon: Calendar, gradient: "from-blue-500 to-cyan-500", glow: "rgba(59,130,246,0.3)", extra: null, extraColor: "" },
@@ -234,7 +234,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* حالات + رزنامة */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* حالات الطلبات */}
         <div className="rounded-3xl p-5 bg-white"

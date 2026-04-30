@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Download, RefreshCw, Trash2, Phone, Home, Building2,
   Package, Tag, MapPin, Calendar, TrendingUp, ShoppingBag,
@@ -77,10 +78,11 @@ function StatusBar({ status }: { status: string }) {
 }
 
 /* ─── Main Component ─────────────────────────────────── */
-export default function AdminOrders() {
+function AdminOrdersInner() {
+  const searchParams = useSearchParams();
   const [orders, setOrders] = useState<OrderWithGender[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState(searchParams.get("status") ?? "");
   const [updating, setUpdating] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -403,5 +405,13 @@ export default function AdminOrders() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminOrders() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center py-24 text-gray-300"><span className="animate-spin text-2xl">⏳</span></div>}>
+      <AdminOrdersInner />
+    </Suspense>
   );
 }
