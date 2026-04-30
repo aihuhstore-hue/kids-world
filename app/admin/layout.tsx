@@ -75,6 +75,11 @@ export default function AdminLayout({
     setIsDark(dark);
   }, []);
 
+  // أغلق الـ sidebar تلقائياً عند التنقل بين الصفحات
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
+
   // تحقق من حالة الإشعارات عند فتح الصفحة
   useEffect(() => {
     if (!authenticated) return;
@@ -646,7 +651,7 @@ export default function AdminLayout({
         {/* Header - dir="ltr" لضمان ظهور زر القائمة دائماً على اليمين */}
         <header
           dir="ltr"
-          className="sticky top-0 z-20 px-4 py-3 flex items-center gap-3 transition-all duration-300"
+          className="sticky top-0 z-50 px-4 py-3 flex items-center gap-3 transition-all duration-300"
           style={{
             background: isDark ? "rgba(13,15,24,0.95)" : "rgba(255,255,255,0.9)",
             backdropFilter: "blur(12px)",
