@@ -56,6 +56,7 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [isMobile, setIsMobile] = useState(true);
   const [pushStatus, setPushStatus] = useState<"unknown" | "granted" | "denied" | "unsupported">("unknown");
 
   // استرجاع كلمة السر
@@ -73,6 +74,10 @@ export default function AdminLayout({
     if (stored === "true") setAuthenticated(true);
     const dark = localStorage.getItem("admin-dark") === "true";
     setIsDark(dark);
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   // أغلق الـ sidebar تلقائياً عند التنقل بين الصفحات
@@ -553,8 +558,8 @@ export default function AdminLayout({
     <div className="min-h-screen flex" dir="rtl" style={{ background: "#0f1117" }}>
 
       {/* Sidebar */}
-      <aside className={`fixed inset-y-0 right-0 w-64 z-40 flex flex-col transition-transform duration-300 ease-in-out lg:translate-x-0 ${
-        sidebarOpen ? "translate-x-0" : "translate-x-full"
+      <aside className={`fixed inset-y-0 right-0 w-64 z-40 flex flex-col transition-transform duration-300 ease-in-out ${
+        (!isMobile || sidebarOpen) ? "translate-x-0" : "translate-x-full"
       }`}
         style={{
           background: "linear-gradient(180deg, #13151f 0%, #0d0f18 100%)",
@@ -637,8 +642,8 @@ export default function AdminLayout({
       </aside>
 
       {/* Mobile overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-30 lg:hidden" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
+      {sidebarOpen && isMobile && (
+        <div className="fixed inset-0 z-30" style={{ background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}
           onClick={() => setSidebarOpen(false)} />
       )}
 
