@@ -639,8 +639,8 @@ export default function AdminLayout({
 
       {/* المحتوى */}
       <div
-        className={`flex-1 md:mr-64 flex flex-col min-h-screen transition-colors duration-300 ${isDark ? "admin-dark" : ""}`}
-        style={{ background: isDark ? "#0d0f18" : "#f1f3f9" }}
+        className={`flex-1 md:mr-64 flex flex-col min-h-screen transition-colors duration-300 admin-area ${isDark ? "admin-dark" : ""}`}
+        style={{ background: isDark ? "#0d0f18" : "#f1f3f9", colorScheme: isDark ? "dark" : "light" }}
       >
 
         {/* Header */}
