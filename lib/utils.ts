@@ -14,7 +14,11 @@ export function cn(...inputs: ClassValue[]) {
 
 export function formatPrice(price: number | null | undefined): string {
   if (price == null || isNaN(price)) return "0 دج";
-  return `${price.toLocaleString("ar-DZ")} دج`;
+  try {
+    return `${price.toLocaleString("ar-DZ")} دج`;
+  } catch {
+    return `${Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")} دج`;
+  }
 }
 
 export function generateOrderNumber(): string {

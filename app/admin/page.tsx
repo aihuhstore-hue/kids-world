@@ -7,7 +7,7 @@ import {
   ArrowLeft, Sparkles, Calendar,
   Clock, CheckCircle, XCircle, Truck, AlertCircle,
 } from "lucide-react";
-import { formatPrice, getStatusLabel } from "@/lib/utils";
+import { formatPrice } from "@/lib/utils";
 import toast from "react-hot-toast";
 
 function playCashSound() {
@@ -141,6 +141,22 @@ export default function AdminDashboard() {
       ? stats.monthRevenue > 0 ? 100 : 0
       : Math.round(((stats.monthRevenue - stats.lastMonthRevenue) / stats.lastMonthRevenue) * 100)
     : 0;
+
+  if (!stats) return (
+    <div className="space-y-5 animate-pulse">
+      <div className="rounded-3xl h-20 bg-gray-200" />
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {[1,2,3].map(i => <div key={i} className="rounded-3xl h-36 bg-gray-200" />)}
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[1,2,3,4].map(i => <div key={i} className="rounded-3xl h-28 bg-gray-200" />)}
+      </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="rounded-3xl h-56 bg-gray-200" />
+        <div className="rounded-3xl h-56 bg-gray-200" />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-5">
