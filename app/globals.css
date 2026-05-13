@@ -70,6 +70,25 @@ body {
   }
 }
 
+/* Float animations — CSS-only, runs on GPU compositor thread */
+@keyframes float-up {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+@keyframes float-down {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(8px); }
+}
+.animate-float-up {
+  animation: float-up 3s ease-in-out infinite;
+  will-change: transform;
+}
+.animate-float-down {
+  animation: float-down 3.5s ease-in-out infinite;
+  animation-delay: 0.5s;
+  will-change: transform;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

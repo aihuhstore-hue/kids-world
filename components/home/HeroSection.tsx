@@ -23,29 +23,21 @@ export default function HeroSection() {
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-yellow-50" />
 
           {/* floating badge */}
-          <motion.div
-            animate={{ y: [0, -6, 0] }}
-            transition={{ repeat: Infinity, duration: 3 }}
-            className="absolute top-3 right-3 bg-white/95 shadow-lg rounded-2xl px-3 py-1.5 flex items-center gap-2"
-          >
+          <div className="animate-float-up absolute top-3 right-3 bg-white/95 shadow-lg rounded-2xl px-3 py-1.5 flex items-center gap-2">
             <span className="text-xl">📦</span>
             <div>
               <p className="font-bold text-xs text-gray-800">توصيل سريع</p>
               <p className="text-[10px] text-gray-400">1-4 أيام</p>
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ repeat: Infinity, duration: 3.5, delay: 0.5 }}
-            className="absolute bottom-5 left-3 bg-white/95 shadow-lg rounded-2xl px-3 py-1.5 flex items-center gap-2"
-          >
+          <div className="animate-float-down absolute bottom-5 left-3 bg-white/95 shadow-lg rounded-2xl px-3 py-1.5 flex items-center gap-2">
             <span className="text-xl">⭐</span>
             <div>
               <p className="font-bold text-xs text-gray-800">+300</p>
               <p className="text-[10px] text-gray-400">عائلة راضية</p>
             </div>
-          </motion.div>
+          </div>
         </div>
 
         {/* Text content */}
@@ -176,11 +168,7 @@ export default function HeroSection() {
               className="relative"
             >
               <div className="relative w-full aspect-square max-w-lg mx-auto">
-                <motion.div
-                  animate={{ y: [0, -10, 0] }}
-                  transition={{ repeat: Infinity, duration: 3 }}
-                  className="absolute top-4 right-4 z-20 bg-white shadow-lg rounded-2xl px-4 py-2"
-                >
+                <div className="animate-float-up absolute top-4 right-4 z-20 bg-white shadow-lg rounded-2xl px-4 py-2">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">📦</span>
                     <div>
@@ -188,13 +176,9 @@ export default function HeroSection() {
                       <p className="text-xs text-gray-400">1-4 أيام</p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
-                <motion.div
-                  animate={{ y: [0, 10, 0] }}
-                  transition={{ repeat: Infinity, duration: 3.5, delay: 0.5 }}
-                  className="absolute bottom-8 left-4 z-20 bg-white shadow-lg rounded-2xl px-4 py-2"
-                >
+                <div className="animate-float-down absolute bottom-8 left-4 z-20 bg-white shadow-lg rounded-2xl px-4 py-2">
                   <div className="flex items-center gap-2">
                     <span className="text-2xl">⭐</span>
                     <div>
@@ -202,7 +186,7 @@ export default function HeroSection() {
                       <p className="text-xs text-gray-400">عائلة راضية</p>
                     </div>
                   </div>
-                </motion.div>
+                </div>
 
                 <div className="w-full h-full bg-gradient-to-br from-yellow-100 to-blue-100 rounded-[3rem] overflow-hidden">
                   <Image
