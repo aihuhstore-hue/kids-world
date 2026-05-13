@@ -32,6 +32,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { items, updateQuantity, removeItem, clearCart, totalPrice } = useCartStore();
 
+  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [communes, setCommunes] = useState<string[]>([]);
   const [deliveryFee, setDeliveryFee] = useState(0);
@@ -61,6 +62,10 @@ export default function CheckoutPage() {
 
   const watchedWilaya = watch("wilayaCode");
   const watchedDeliveryType = watch("deliveryType");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -156,6 +161,18 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  if (!mounted) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <Loader2 className="w-8 h-8 animate-spin text-gray-400" />
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (items.length === 0) {
     return (
