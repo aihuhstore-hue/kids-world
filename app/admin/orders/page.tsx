@@ -309,14 +309,26 @@ function AdminOrdersInner() {
                     </div>
                   </div>
 
-                  {/* ── Product + Total (always visible) ── */}
-                  <div className="flex items-center justify-between gap-2 bg-gray-50 rounded-xl px-3 py-2.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <Package className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <span className="text-sm text-gray-700 truncate">{productNames}</span>
-                      <span className="text-xs bg-gray-200 text-gray-600 font-bold px-1.5 py-0.5 rounded-full flex-shrink-0">{totalQty} قطعة</span>
+                  {/* ── Products + Total (always visible) ── */}
+                  <div className="bg-gray-50 rounded-xl px-3 py-2.5 space-y-1.5">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-1.5">
+                        <Package className="w-4 h-4 text-gray-400" />
+                        <span className="text-xs font-bold text-gray-500">{order.items?.length ?? 0} منتج — {totalQty} قطعة</span>
+                      </div>
+                      <span className="text-base font-black text-gray-900">{formatPrice(order.total)}</span>
                     </div>
-                    <span className="text-base font-black text-gray-900 flex-shrink-0">{formatPrice(order.total)}</span>
+                    {order.items?.map((item, idx) => (
+                      <div key={idx} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="w-5 h-5 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0">
+                            {item.quantity}
+                          </span>
+                          <span className="text-gray-700 font-medium">{item.product?.name ?? "منتج"}</span>
+                        </div>
+                        <span className="text-gray-500 text-xs flex-shrink-0">{formatPrice(item.price * item.quantity)}</span>
+                      </div>
+                    ))}
                   </div>
 
                   {/* ── Expanded Details ── */}
