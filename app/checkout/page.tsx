@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import Link from "next/link";
 import {
   Home,
@@ -220,8 +219,10 @@ export default function CheckoutPage() {
                 <div className="p-4 space-y-3">
                   {items.map((item) => (
                     <div key={item.id} className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3">
-                      <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-white border border-gray-200">
-                        <Image src={item.image} alt={item.name} fill className="object-cover" />
+                      <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 border border-gray-200">
+                        {item.image ? (
+                          <img src={item.image} alt={item.name} width={64} height={64} className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+                        ) : null}
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="font-semibold text-sm text-gray-800 truncate">{item.name}</p>

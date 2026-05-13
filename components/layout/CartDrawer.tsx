@@ -1,7 +1,6 @@
 "use client";
 
 import { X, ShoppingCart, Trash2, Plus, Minus } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/utils";
@@ -56,13 +55,21 @@ export default function CartDrawer() {
                 key={item.id}
                 className="flex items-center gap-3 bg-gray-50 rounded-2xl p-3"
               >
-                <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-white">
-                  <Image
-                    src={item.image}
-                    alt={item.name}
-                    fill
-                    className="object-cover"
-                  />
+                <div className="w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100">
+                  {item.image ? (
+                    <img
+                      src={item.image}
+                      alt={item.name}
+                      width={64}
+                      height={64}
+                      className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.style.display = "none"; }}
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <ShoppingCart className="w-6 h-6 text-gray-300" />
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-sm truncate">{item.name}</p>
