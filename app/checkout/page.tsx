@@ -57,6 +57,8 @@ export default function CheckoutPage() {
     defaultValues: { deliveryType: "home" },
   });
 
+  const watchedGender = watch("gender");
+
   const watchedWilaya = watch("wilayaCode");
   const watchedDeliveryType = watch("deliveryType");
 
@@ -387,6 +389,32 @@ export default function CheckoutPage() {
                     />
                     {errors.phone && (
                       <p className="text-red-500 text-xs mt-1">{errors.phone.message}</p>
+                    )}
+                  </div>
+
+                  {/* Gender */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      جنس الطفل <span className="text-red-500">*</span>
+                    </label>
+                    <div className="flex items-center gap-3">
+                      <label className="flex flex-col items-center gap-1 cursor-pointer">
+                        <input type="radio" {...register("gender")} value="girl" className="hidden" />
+                        <div className={`w-11 h-11 rounded-full flex items-center justify-center text-xl transition-all duration-200 border-2 ${watchedGender === "girl" ? "border-pink-400 bg-pink-100 shadow-md scale-110" : "border-pink-200 bg-pink-50 hover:border-pink-300"}`}>
+                          👧
+                        </div>
+                        <span className={`text-xs font-semibold ${watchedGender === "girl" ? "text-pink-600" : "text-gray-400"}`}>بنت</span>
+                      </label>
+                      <label className="flex flex-col items-center gap-1 cursor-pointer">
+                        <input type="radio" {...register("gender")} value="boy" className="hidden" />
+                        <div className={`w-11 h-11 rounded-full flex items-center justify-center text-xl transition-all duration-200 border-2 ${watchedGender === "boy" ? "border-blue-400 bg-blue-100 shadow-md scale-110" : "border-blue-200 bg-blue-50 hover:border-blue-300"}`}>
+                          👦
+                        </div>
+                        <span className={`text-xs font-semibold ${watchedGender === "boy" ? "text-blue-600" : "text-gray-400"}`}>ولد</span>
+                      </label>
+                    </div>
+                    {errors.gender && (
+                      <p className="text-red-500 text-xs mt-1">{errors.gender.message}</p>
                     )}
                   </div>
 
